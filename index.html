@@ -1,164 +1,38 @@
 <!doctype html>
-<html lang="zh-Hant" data-theme="light">
+<html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="初一幾何工作紙 7.1，第 1 題：角度推算與 T 字解同步動畫。">
+<meta name="description" content="初一幾何工作紙 7.1–7.2：14 題角度推算及證明，思路動畫與 T 字解同步。">
 <meta name="theme-color" content="#F6F7F2">
-<title>兩直線相交｜第 1 題</title>
+<title>角與平行線｜幾何工作紙 7.1–7.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;900&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-<style>
-:root{--paper:#F6F7F2;--grid:#E2E7EC;--card:#fff;--ink:#1E2833;--muted:#65717D;--blue:#2F5DA8;--blue-soft:#E3EBF7;--red:#C23B2A;--red-soft:#FBE6E2;--hi:#F3E07A;--amber:#A8660F;--serif:"Noto Serif TC","PMingLiU",serif;--sans:"Noto Sans TC","Microsoft JhengHei",sans-serif;--math:"STIX Two Text","Cambria Math","Times New Roman",serif}
-*{box-sizing:border-box}body{margin:0;background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;color:var(--ink);font:16px/1.75 var(--sans);padding:28px 20px 44px}.wrap{max-width:1320px;margin:auto}h1{font:900 clamp(25px,3vw,34px)/1.4 var(--serif);margin:0 0 20px}.problem{padding:18px 24px;margin-bottom:18px}.card{background:var(--card);border:1px solid var(--grid);border-radius:6px}.problem p{margin:0}.problem p+p{margin-top:6px;padding-left:1.5em}.math{font-family:var(--math);font-size:1.09em}.main{display:grid;grid-template-columns:minmax(0,1.16fr) minmax(0,1fr);gap:18px;align-items:start}.work{--proof-left:68.253968%;padding:19px 22px 24px;min-height:570px}h2{font:600 18px/1.5 var(--serif);position:relative;left:var(--proof-left);width:max-content;transform:translateX(-50%);text-align:center;margin:0;padding:0 0 7px}.proof{border-top:1px solid var(--ink)}.row{display:grid;grid-template-columns:minmax(0,var(--proof-left)) minmax(0,1fr);cursor:pointer;outline-offset:3px}.cell{padding:12px 10px;display:flex;gap:8px;align-items:baseline;min-width:0}.cell:first-child{border-right:1px solid var(--ink)}.cell:last-child{font-size:14px}.num{font-family:var(--math);color:var(--muted);flex:none;width:1.05em}.row.active{background:var(--blue-soft);color:var(--blue)}.row.active .num{color:var(--blue)}.row:hover{background:#F1F5FB}.formula{font:19px/1.95 var(--math);min-width:0}.continuation{display:block;padding-left:3.8em;text-indent:-.8em}.known{font:15px/1.85 var(--sans)}.frac{display:inline-flex;flex-direction:column;vertical-align:middle;align-items:center;font:16px/1.08 var(--math);margin:0 .14em;position:relative;top:-1px}.frac span{padding:0 .16em}.frac span:first-child{border-bottom:1.2px solid;padding-bottom:2px}.frac span:last-child{padding-top:2px}.answer{display:flex;justify-content:flex-end;margin:26px 0 0;min-height:74px}.answer span{border:2px solid var(--red);border-radius:3px;padding:8px 13px;color:var(--red);font:20px/1.75 var(--math);background:linear-gradient(transparent 52%,#F3E07A66 52%)}[hidden]{display:none!important}.new{animation:write .55s both}@keyframes write{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}.stage{position:sticky;top:16px;padding:10px 18px 18px;container-type:inline-size;container-name:animation}.figure{position:relative}svg{display:block;width:100%;height:auto;overflow:visible}.axis{fill:none;stroke:var(--ink);stroke-width:2.3;stroke-linecap:round}.point{fill:var(--ink)}.letter{font:italic 26px var(--math);fill:var(--ink);text-anchor:middle}.angle{fill:none;stroke:var(--blue);stroke-width:2.4;stroke-linecap:round;stroke-dasharray:1 1;stroke-dashoffset:0;transition:opacity .3s}.angle.enter{animation:draw .85s ease-out both}@keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}.known-arc{stroke:var(--amber);stroke-width:1.7}.sector{fill:var(--blue);opacity:.085}.sector.final{fill:var(--red)}.highlight-ray{stroke:var(--blue);stroke-width:3.3;stroke-linecap:round;fill:none;animation:write .4s both}.angle-label{font:600 25px var(--math);fill:var(--blue);text-anchor:middle;paint-order:stroke;stroke:var(--card);stroke-width:7;stroke-linejoin:round}.angle-label.known-label{font-size:23px;fill:var(--amber)}.final-angle{stroke:var(--red)}.final-label{fill:var(--red)}.tick{stroke:var(--blue);stroke-width:2}.controls{border-top:1px solid var(--grid);padding-top:16px;display:grid;grid-template-columns:44px minmax(0,1fr) minmax(0,1.28fr) minmax(0,1fr);gap:8px}button{font:500 14px var(--sans);padding:9px 7px;min-height:44px;border:1px solid var(--ink);background:transparent;color:var(--ink);border-radius:4px;cursor:pointer;transition:background .15s,transform .15s}button:hover:not(:disabled){background:var(--blue-soft);transform:translateY(-1px)}button:active:not(:disabled){transform:translateY(1px)}button.primary{background:var(--ink);color:white}button.primary:hover{background:var(--blue)}button:disabled{opacity:.3;cursor:default}button:focus-visible,input:focus-visible,.row:focus-visible{outline:2px solid var(--blue);outline-offset:3px}.scrub{display:flex;align-items:center;gap:14px;margin-top:14px}input[type=range]{flex:1;min-width:0;height:24px;margin:0;accent-color:var(--blue);cursor:pointer}.count{font:14px var(--math);color:var(--muted);min-width:3.2em;text-align:right;font-variant-numeric:tabular-nums}.skip{position:fixed;top:-80px;background:white;color:var(--ink);padding:10px;z-index:3}.skip:focus{top:4px}noscript p{color:var(--red)}
-@media(min-width:1100px){.formula{font-size:20px}.work{min-height:590px}.stage{padding-inline:20px}}
-@media(max-width:1000px) and (min-width:761px){.main{grid-template-columns:1fr 1fr}.work{padding-inline:12px}.formula{font-size:17px}.cell{padding-inline:6px;gap:5px}.cell:last-child{font-size:13px}.work{--proof-left:65.517241%}.known{font-size:13px}}
-@media(max-width:760px){body{padding:20px 12px 30px}h1{margin-bottom:14px}.problem{padding:14px 16px;font-size:14px}.problem p+p{padding-left:0}.main{grid-template-columns:1fr;gap:14px}.stage{position:static;grid-row:1;padding:4px 14px 16px}.figure{max-width:520px;margin:auto}.work{min-height:0;padding:17px 12px 24px}.formula{font-size:18px}.known{font-size:14px}.cell{padding:11px 7px;gap:5px}.cell:last-child{font-size:13px}.work{--proof-left:66.666667%}.answer{margin-top:22px}.answer span{font-size:19px}button{font-size:13px;padding-inline:3px}.continuation{padding-left:2.9em}.frac{font-size:15px}}
-@media(max-width:359px){.formula{font-size:16px}.known{font-size:12px}.cell:last-child{font-size:12px}.answer span{font-size:17px}.work{--proof-left:65.517241%}}
-.work{min-height:0}.formula{line-height:1.65}.continuation{padding-left:3em;text-indent:0}.known{display:block}.cell{padding-block:10px}.result{white-space:nowrap}
-@media(max-width:1000px){.result{display:block}}
-@media(max-width:359px){.continuation{padding-left:2em}.formula{font-size:15px}.frac{font-size:13px}.work{--proof-left:68.75%}.answer span{font-size:15px}}
-.page-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px}.page-head h1{margin:0}.solution-switch{display:inline-flex;align-items:center;gap:9px;min-height:44px;cursor:pointer;white-space:nowrap;font-size:14px}.solution-switch input{position:absolute;width:1px;height:1px;opacity:0}.switch-track{width:38px;height:22px;border-radius:12px;background:var(--muted);position:relative;transition:background .2s}.switch-track::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:white;transition:transform .2s}.solution-switch input:checked+.switch-track{background:var(--blue)}.solution-switch input:checked+.switch-track::after{transform:translateX(16px)}.solution-switch input:focus-visible+.switch-track{outline:2px solid var(--blue);outline-offset:4px}.main[data-solution="false"]{grid-template-columns:minmax(0,760px);justify-content:center}.main[data-solution="false"] .stage{position:static;grid-row:auto}.main[data-solution="false"] .figure{max-width:600px;margin-inline:auto}.thought{font-size:18px;font-weight:500;min-height:3.2em;margin:12px 5px 0;text-align:center;text-wrap:balance;line-height:1.6}.relation{fill:none;stroke:var(--blue);stroke-width:1.8;stroke-dasharray:6 5;animation:write .5s both}
-@media(max-width:760px){.page-head{margin-bottom:14px;gap:10px}.solution-switch{font-size:13px}.thought{font-size:16px;margin-top:14px}}
-.controls button{min-width:0;white-space:nowrap}.target-angle{stroke-dasharray:.07 .045;stroke-width:2.6}.goal-name{font-size:20px;font-weight:500}
-@container animation (max-width:420px){.controls{gap:6px}.controls button{font-size:13px;padding-inline:3px}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
-</style>
+<link rel="stylesheet" href="styles.css">
+<script src="lessons.js" defer></script>
+<script src="app.js" defer></script>
 </head>
 <body>
 <a class="skip" href="#demo">跳到解答</a>
 <div class="wrap">
-<header class="page-head"><h1>兩直線相交</h1><label class="solution-switch"><input id="show-solution" type="checkbox" role="switch" aria-controls="solution"><span class="switch-track" aria-hidden="true"></span><span>顯示解答</span></label></header>
-<section class="card problem" aria-label="第 1 題">
-<p>1. 已知：直線 <span class="math">AB</span> 與 <span class="math">CD</span> 相交於 <span class="math">O</span> 點，<span class="math">OA</span> 平分 <span class="math">∠EOC</span>，<span class="math">∠EOD = 118°</span>。</p>
-<p>求：<span class="math">∠EOA、∠AOC、∠BOC</span> 和 <span class="math">∠BOD</span> 的度數。</p>
-</section>
+<header class="page-head"><h1>角與平行線</h1><label class="solution-switch"><input id="show-solution" type="checkbox" role="switch" aria-controls="solution"><span class="switch-track" aria-hidden="true"></span><span>顯示解答</span></label></header>
+<nav class="chapters" id="chapters" aria-label="選擇章節"></nav>
+<nav class="questions" id="questions" aria-label="選擇題目"></nav>
+<section class="card problem" id="problem" aria-label="題目"></section>
 <main class="main" id="demo" data-solution="false">
 <section class="card work" id="solution" aria-labelledby="solution-title" hidden>
-<h2 id="solution-title">解</h2>
-<div class="proof" id="proof"></div>
-<div class="answer" id="answer" hidden><span>∴ ∠EOA = ∠AOC = ∠BOD = 31°，<br>　∠BOC = 149°。</span></div>
-<noscript><p>請開啟 JavaScript 以播放逐步解答。</p></noscript>
+<h2 id="solution-title">解</h2><div class="proof" id="proof"></div><div class="answer" id="answer" hidden></div>
 </section>
-<section class="card stage" aria-label="角度動畫">
-<p class="thought" id="thought">求 ∠EOA、∠AOC、∠BOC 和 ∠BOD。</p>
-<div class="figure"><svg id="figure" viewBox="0 0 640 510" role="img" aria-labelledby="figure-title figure-desc"><title id="figure-title">直線 AB 與 CD 相交於 O</title><desc id="figure-desc">OA 平分左方的角 EOC。上方角 EOD 為 118 度。</desc><g id="shades"></g><g id="axes"></g><g id="rays"></g><g id="arcs"></g><g id="labels"></g></svg></div>
-<div class="controls">
-<button id="reset" aria-label="重新開始" title="重新開始">↺</button>
-<button id="prev">上一步</button>
-<button id="play" class="primary">自動播放</button>
-<button id="next">下一步</button>
-</div>
-<div class="scrub"><input id="range" type="range" min="0" max="9" value="0" step="1" aria-label="解答步驟"><output class="count" id="count" for="range">0 / 9</output></div>
-<div id="announce" role="status" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)"></div>
+<section class="card stage" aria-label="幾何動畫">
+<p class="thought" id="thought"></p>
+<div class="figure"><svg id="figure" viewBox="0 0 640 510" role="img" aria-labelledby="figure-title figure-desc"><title id="figure-title">幾何圖形</title><desc id="figure-desc"></desc><g id="shades"></g><g id="axes"></g><g id="rays"></g><g id="arcs"></g><g id="labels"></g></svg></div>
+<div class="controls"><button id="reset" aria-label="重新開始" title="重新開始">↺</button><button id="prev">上一步</button><button id="play" class="primary" aria-pressed="false">自動播放</button><button id="next">下一步</button></div>
+<div class="scrub"><input id="range" type="range" min="0" value="0" step="1" aria-label="解答步驟"><output class="count" id="count" for="range"></output></div>
+<div id="announce" class="sr-only" role="status" aria-live="polite"></div>
 </section>
 </main>
+<noscript><p>請開啟 JavaScript 以選擇題目及播放動畫。</p></noscript>
 </div>
-<script>
-(()=>{
-'use strict';
-const $=id=>document.getElementById(id);
-const half='<span class="frac" role="math" aria-label="二分之一"><span>1</span><span>2</span></span>';
-const rows=[
-{at:0,target:0,reason:'已知',base:'<span class="known">AB、CD 相交於 O，<br>OA 平分 ∠EOC，∠EOD = 118°。</span>'},
-{at:1,target:2,reason:'平角定義、角的差',base:'∠EOC = 180° − ∠EOD',calc:2,extra:'<span class="continuation">= 180° − 118°<span class="result"> = 62°</span></span>'},
-{at:3,target:4,reason:'平分定義',base:`∠EOA = ∠AOC<br><span class="continuation">= ${half}∠EOC</span>`,calc:4,extra:`<span class="continuation">= ${half}× 62° = 31°</span>`},
-{at:5,target:6,reason:'平角定義、角的差',base:'∠BOC = 180° − ∠AOC',calc:6,extra:'<span class="continuation">= 180° − 31°<span class="result"> = 149°</span></span>'},
-{at:7,target:8,reason:'對頂角相等',base:'∠BOD = ∠AOC',calc:8,extra:'<span class="continuation">= 31°</span>'}
-];
-const announcements=['求 ∠EOA、∠AOC、∠BOC 和 ∠BOD 的度數。','角 EOC 等於 180 度減角 EOD。','角 EOC 等於 62 度。','OA 平分角 EOC，角 EOA 與角 AOC 都是角 EOC 的一半。','角 EOA 與角 AOC 均為 31 度。','角 BOC 等於 180 度減角 AOC。','角 BOC 為 149 度。','角 BOD 與角 AOC 是對頂角，兩角相等。','角 BOD 為 31 度。','所以角 EOA、角 AOC、角 BOD 均為 31 度，角 BOC 為 149 度。'];
-const thoughts=['求 ∠EOA、∠AOC、∠BOC 和 ∠BOD。','∠EOC 與 ∠EOD 組成平角。','由平角扣去已知角，求 ∠EOC。','OA 平分 ∠EOC。','把 ∠EOC 平分，得到 ∠EOA 和 ∠AOC。','∠BOC 與 ∠AOC 組成平角。','由平角扣去 ∠AOC，求 ∠BOC。','∠BOD 與 ∠AOC 是對頂角。','利用對頂角相等，求 ∠BOD。','回看四個所求的角。'];
-let step=0,timer=null,previousStep=-1,showSolution=false;
-const NS='http://www.w3.org/2000/svg',cx=320,cy=267;
-function el(tag,attrs,text){const e=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,v);if(text!==undefined)e.textContent=text;return e;}
-function pos(a,r){const t=a*Math.PI/180;return[cx+r*Math.cos(t),cy-r*Math.sin(t)];}
-function arc(a,b,r){const p=pos(a,r),q=pos(b,r);return `M ${p} A ${r} ${r} 0 ${Math.abs(b-a)>180?1:0} ${b>a?0:1} ${q}`;}
-function sector(a,b,r){return `M ${cx} ${cy} L ${pos(a,r)} A ${r} ${r} 0 ${Math.abs(b-a)>180?1:0} ${b>a?0:1} ${pos(b,r)} Z`;}
-const points={A:180,B:0,C:211,D:31,E:149};
-function init(){
- for(const [name,a] of Object.entries(points)){
-  const p=pos(a,name==='E'?235:255);
-  $('axes').append(el('path',{d:`M ${cx} ${cy} L ${p}`,class:'axis'}));
-  let [x,y]=pos(a,name==='E'?260:279);
-  if(name==='A'||name==='B')y-=10;
-  $('labels').append(el('text',{x,y:y+8,class:'letter'},name));
- }
- $('labels').append(el('circle',{cx,cy,r:3.6,class:'point'}),el('text',{x:cx+2,y:cy+29,class:'letter'},'O'));
-}
-function angle(key,a,b,r,label,options={}){
- if(options.goal)label='?';
- else if(!showSolution&&!options.known&&label)label='?';
- const path=el('path',{d:arc(a,b,r),class:`angle ${options.known?'known-arc ':''}${options.final?'final-angle ':''}${options.goal?'target-angle ':''}${options.enter?'enter':''}`,pathLength:1,'data-angle-name':key});
- $('arcs').append(path);
- if(options.goal){const [x,y]=pos(options.labelAngle??((a+b)/2),options.nameR??110);$('arcs').append(el('text',{x,y:y+7,class:'angle-label goal-name'},`∠${key}`));}
- if(label){const [x,y]=pos(options.labelAngle??((a+b)/2),options.labelR??r+25);$('arcs').append(el('text',{x,y:y+8,class:`angle-label ${options.known?'known-label ':''}${options.goal?'goal-label ':''}${options.final?'final-label':''}`},label));}
-}
-function shade(a,b,r,final=false){$('shades').append(el('path',{d:sector(a,b,r),class:'sector'+(final?' final':''),'data-angle':`${a},${b}`}));}
-function ray(a){$('rays').append(el('path',{d:`M ${cx} ${cy} L ${pos(a,255)}`,class:'highlight-ray'}));}
-function tick(a,r=84){const p=pos(a,r-7),q=pos(a,r+7);$('arcs').append(el('path',{d:`M ${p} L ${q}`,class:'tick'}));}
-function draw(){
- for(const id of ['shades','rays','arcs'])$(id).replaceChildren();
- const fresh=step!==previousStep;
- angle('known',31,149,162,'118°',{known:true,labelR:189});
- if(step===0){
-  angle('EOA',149,180,144,'?',{goal:true,enter:fresh,labelR:177,labelAngle:164});
-  angle('AOC',180,211,144,'?',{goal:true,enter:fresh,labelR:177,labelAngle:196});
-  angle('BOC',0,-149,200,'?',{goal:true,enter:fresh,labelAngle:-71,labelR:225,nameR:153});
-  angle('BOD',0,31,144,'?',{goal:true,enter:fresh,labelR:177});
-  shade(149,211,144);shade(0,31,144);shade(0,-149,200);tick(164.5,144);tick(195.5,144);
- }
- if(step===1||step===2){shade(149,211,132);ray(31);ray(211);angle('eoc',149,211,134,step===1?'?':'62°',{enter:fresh,labelAngle:180,labelR:169});}
- if(step>=3){
-  const final=step===9;
-  angle('eoa',149,180,84,step===3?'?':'31°',{enter:fresh&&(step===3||step===4),final,labelR:119,labelAngle:164});
-  angle('aoc',180,211,84,step===3?'?':'31°',{enter:fresh&&(step===3||step===4),final,labelR:119,labelAngle:196});
-  tick(164.5);tick(195.5);
-  if(step===3||step===4){shade(149,180,85);shade(180,211,85);ray(180);}
- }
- if(step>=5){angle('boc',0,-149,119,step===5?'?':'149°',{enter:fresh&&(step===5||step===6),final:step===9,labelAngle:-71,labelR:154});if(step===5||step===6){shade(0,-149,118);ray(0);ray(180);}}
- if(step>=7){angle('bod',0,31,84,step===7?'?':'31°',{enter:fresh&&(step===7||step===8),final:step===9,labelR:124});if(step===7||step===8){shade(0,31,84);shade(180,211,84);}}
- if(step===9){shade(149,211,84,true);shade(0,31,84,true);shade(0,-149,119,true);}
- if(!showSolution){
-  if(step===1||step===2){shade(31,149,132);$('arcs').append(el('path',{d:arc(31,211,143),class:'relation'}));}
-  if(step===5||step===6){shade(180,211,118);$('arcs').append(el('path',{d:arc(0,-180,133),class:'relation'}));}
- }
- $('figure-desc').textContent=showSolution?announcements[step]:thoughts[step];
-}
-function render(){
- const spoken=showSolution?announcements[step]:thoughts[step];
- $('solution').hidden=!showSolution;
- $('demo').setAttribute('data-solution',String(showSolution));
- $('show-solution').checked=showSolution;
- $('thought').hidden=showSolution&&step!==0;
- $('thought').textContent=thoughts[step];
- const active=rows.findLastIndex(r=>step>=r.at);
- $('proof').innerHTML=showSolution?rows.map((r,i)=>step<r.at?'':`<div class="row ${i===active&&step<9?'active':''}" role="button" tabindex="0" aria-label="查看第 ${i+1} 步：${r.reason}" data-to="${r.target}"><div class="cell"><span class="num">${i+1}.</span><div class="formula">${r.base}${r.calc!==undefined&&step>=r.calc?r.extra:''}</div></div><div class="cell"><span class="num">${i+1}.</span><span>${r.reason}</span></div></div>`).join(''):'';
- if(showSolution&&step>previousStep){const row=$('proof').children[active];if(row&&rows[active].at===step)row.classList.add('new');}
- $('answer').hidden=!showSolution||step!==9;
- if(showSolution&&step===9&&previousStep!==9)$('answer').classList.add('new');
- $('range').value=step;$('count').textContent=`${step} / 9`;
- $('range').setAttribute('aria-valuetext',spoken);
- $('prev').disabled=step===0;$('next').disabled=step===9;$('reset').disabled=step===0&&!timer;
- $('announce').textContent=spoken;
- if(!timer)$('play').textContent=step===9?'重新播放':'自動播放';
- draw();previousStep=step;
-}
-function pause(){clearTimeout(timer);timer=null;$('play').textContent=step===9?'重新播放':'自動播放';$('play').setAttribute('aria-pressed','false');}
-function go(n){pause();step=Math.max(0,Math.min(9,n));render();$('play').textContent=step===9?'重新播放':'自動播放';}
-function advance(){if(step>=9){pause();render();return;}step++;render();if(step===9){pause();render();return;}timer=setTimeout(advance,step===3||step===5?3200:2700);}
- $('next').onclick=()=>go(step+1);$('prev').onclick=()=>go(step-1);$('reset').onclick=()=>go(0);$('range').oninput=e=>go(Number(e.target.value));
- $('show-solution').onchange=e=>{pause();showSolution=e.target.checked;render();};
- $('play').onclick=()=>{if(timer){pause();render();return;}if(step===9){step=0;render();}$('play').textContent='暫停';$('play').setAttribute('aria-pressed','true');timer=setTimeout(advance,1800);$('reset').disabled=false;};
- $('proof').addEventListener('click',e=>{const row=e.target.closest('[data-to]');if(row)go(Number(row.dataset.to));});
- $('proof').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const row=e.target.closest('[data-to]');if(row){e.preventDefault();go(Number(row.dataset.to));}}});
- document.addEventListener('keydown',e=>{if(e.target.matches('input,button,[role="button"]'))return;if(e.key==='ArrowRight'){e.preventDefault();go(step+1);}if(e.key==='ArrowLeft'){e.preventDefault();go(step-1);}});
- document.addEventListener('visibilitychange',()=>{if(document.hidden){pause();render();}});
- // A URL fragment reopens the chosen animation position when reviewing a specific step.
- const requested=Number(location.hash.replace('#step=',''));if(Number.isInteger(requested)&&requested>=0&&requested<=9)step=requested;
- // Each question opens with its solution concealed; this preference is never persisted.
- init();render();$('play').setAttribute('aria-pressed','false');
-})();
-</script>
 </body>
 </html>

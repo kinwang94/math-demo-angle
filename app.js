@@ -1,0 +1,94 @@
+'use strict';
+(()=>{
+const $=id=>document.getElementById(id),NS='http://www.w3.org/2000/svg';
+const LESSONS=window.GEOMETRY_LESSONS;
+const CHAPTERS=[['cross','兩直線相交'],['perp','兩直線垂直'],['parallel','平行線的判定']];
+let lesson=LESSONS[0],step=0,showSolution=false,timer=null,frames=[],previousStep=-1;
+const last=()=>frames.length-1;
+const plain=s=>s.replace(/<span class="frac"[\s\S]*?<\/span><\/span>/g,'二分之一').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
+function svg(tag,attrs,text){const n=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);if(text!==undefined)n.textContent=text;return n;}
+function xy(center,a,r){const t=a*Math.PI/180;return[center[0]+r*Math.cos(t),center[1]-r*Math.sin(t)];}
+function arc(g,r){return `M ${xy(g.center,g.a,r)} A ${r} ${r} 0 ${Math.abs(g.b-g.a)>180?1:0} ${g.b>g.a?0:1} ${xy(g.center,g.b,r)}`;}
+function geometry(a){
+ const p=lesson.diagram.points;
+ if(a.vertex)return{center:p[a.vertex],a:a.a,b:a.b};
+ const [u,o,v]=a.ends.split(''),c=p[o];
+ const direction=x=>Math.atan2(c[1]-p[x][1],p[x][0]-c[0])*180/Math.PI;
+ const start=direction(u),end=direction(v),delta=((end-start+540)%360)-180;
+ return{center:c,a:start,b:start+(Math.abs(delta+180)<.001?180:delta)};
+}
+function segment(name){const d=lesson.diagram,found=d.segments.find(s=>s[0]===name),value=found?found[1]:name;return typeof value==='string'?[d.points[value[0]],d.points[value[1]]]:value;}
+function line(name,cls){const [a,b]=segment(name);$('rays').append(svg('path',{d:`M ${a} L ${b}`,class:cls}));}
+function rightMark(a){const g=geometry(a),p=xy(g.center,g.a,21),q=xy(g.center,g.b,21),m=[p[0]+q[0]-g.center[0],p[1]+q[1]-g.center[1]];$('arcs').append(svg('path',{d:`M ${p} L ${m} L ${q}`,class:'right-mark','data-right':a.name}));}
+function equalTick(a,count){const g=geometry(a),mid=(g.a+g.b)/2;for(let i=0;i<count;i++){const angle=mid+(i-(count-1)/2)*8,p=xy(g.center,angle,a.r-6),q=xy(g.center,angle,a.r+6);$('arcs').append(svg('path',{d:`M ${p} L ${q}`,class:'tick','data-equal-angle':a.name,'data-equal-count':count}));}}
+function arrow(name,count,red){
+ let [a,b]=segment(name);if(b[0]<a[0]||(Math.abs(b[0]-a[0])<.01&&b[1]>a[1]))[a,b]=[b,a];
+ const dx=b[0]-a[0],dy=b[1]-a[1],length=Math.hypot(dx,dy),u=[dx/length,dy/length],n=[-u[1],u[0]],mid=[(a[0]+b[0])/2,(a[1]+b[1])/2];
+ for(let i=0;i<count;i++){const c=[mid[0]+u[0]*(i-(count-1)/2)*14,mid[1]+u[1]*(i-(count-1)/2)*14],p=[c[0]-u[0]*6+n[0]*6,c[1]-u[1]*6+n[1]*6],q=[c[0]-u[0]*6-n[0]*6,c[1]-u[1]*6-n[1]*6];$('arcs').append(svg('path',{d:`M ${p} L ${c} L ${q}`,class:'parallel-mark'+(red?' red':''),'data-parallel':name}));}
+}
+function connectedGroups(groups){const edges=new Map();for(const group of groups)for(const a of group){if(!edges.has(a))edges.set(a,new Set());for(const b of group)edges.get(a).add(b);}const result=[],seen=new Set();for(const a of edges.keys())if(!seen.has(a)){const group=[],todo=[a];while(todo.length){const b=todo.pop();if(seen.has(b))continue;seen.add(b);group.push(b);for(const c of edges.get(b)||[])todo.push(c);}result.push(group);}return result;}
+function makeFrames(){frames=[{kind:'goal',row:0}];lesson.rows.slice(1).forEach((r,i)=>{frames.push({kind:'relation',row:i+1});if(r.calc)frames.push({kind:'calculation',row:i+1});});frames.push({kind:'answer',row:lesson.rows.length-1});}
+function rowState(){
+ const visible=new Set([0]),calculated=new Set(),revealed=new Set(lesson.diagram.known||[]),pairs=[],right=new Set(lesson.diagram.right||[]);
+ for(const frame of frames.slice(1,step+1)){if(frame.kind==='answer')continue;visible.add(frame.row);const r=lesson.rows[frame.row];if(frame.kind==='calculation'||!r.calc){calculated.add(frame.row);for(const a of r.reveal)revealed.add(a);}if(frame.kind==='relation'){for(const p of r.pairs)pairs.push({names:p,kind:r.relation||'parallel'});for(const a of r.right||[])right.add(a);}}
+ return{visible,calculated,revealed,pairs,right};
+}
+function angle(a,state,focus,goal,final){
+ const g=geometry(a),known=(lesson.diagram.known||[]).includes(a.name),isValue=a.value!=='';
+ const active=focus.has(a.name),css=`angle ${known?'known-arc ':''}${goal?'target-angle ':''}${final?'final-angle ':''}${active?'focused ':''}${step!==previousStep&&active?'enter':''}`;
+ if(active||goal||final)$('shades').append(svg('path',{d:`M ${g.center} L ${xy(g.center,g.a,a.r)} A ${a.r} ${a.r} 0 ${Math.abs(g.b-g.a)>180?1:0} ${g.b>g.a?0:1} ${xy(g.center,g.b,a.r)} Z`,class:'sector'+(final?' final':''),'data-angle':a.name}));
+ $('arcs').append(svg('path',{d:arc(g,a.r),class:css,pathLength:1,'data-angle-name':a.name}));
+ const mid=a.labelAngle??((g.a+g.b)/2);
+ let label=goal?'?':known?a.value:isValue?(showSolution&&state.revealed.has(a.name)?a.value:'?'):'';
+ if(!known&&!goal&&((frames[step].kind==='goal')||(!active&&!state.revealed.has(a.name))))label='';
+ if(goal){const p=xy(g.center,mid,a.nameR??a.r+105);$('arcs').append(svg('text',{x:p[0]+(a.nameDX||0),y:p[1]+7+(a.nameDY||0),class:'angle-label goal-name'},'∠'+a.name));}
+ if(label){const p=xy(g.center,mid,a.labelR??a.r+28);$('arcs').append(svg('text',{x:p[0]+(a.labelDX||0),y:p[1]+8+(a.labelDY||0),class:`angle-label ${known?'known-label ':''}${goal?'goal-label ':''}${final?'final-label':''}`,'data-value-for':a.name},label));}
+}
+function initDiagram(){
+ for(const id of ['axes','labels'])$(id).replaceChildren();const d=lesson.diagram;
+ for(const [name] of d.segments){const [a,b]=segment(name);$('axes').append(svg('path',{d:`M ${a} L ${b}`,class:'axis'}));}
+ for(const [name,p] of Object.entries(d.points)){$('labels').append(svg('circle',{cx:p[0],cy:p[1],r:2.7,class:'point'}));const label=d.labels[name]||[p[0]+13,p[1]-13];$('labels').append(svg('text',{x:label[0],y:label[1],class:'letter'},name));}
+ $('figure-title').textContent=CHAPTERS.find(c=>c[0]===lesson.chapter)[1]+'，第 '+lesson.number+' 題';
+}
+function draw(state){
+ for(const id of ['shades','rays','arcs'])$(id).replaceChildren();
+ const f=frames[step],final=f.kind==='answer',goal=f.kind==='goal',r=lesson.rows[f.row];
+ const focus=new Set(goal?[...lesson.goals,...(lesson.goalFocus||[])]:final?lesson.goals:r.focus),visible=new Set([...state.revealed,...focus,...(lesson.diagram.symbols||[])]);
+ if(goal)for(const p of lesson.goalPairs||[])for(const n of p)line(n,'highlight-ray target-line');
+ const proven=new Map(),goalLines=new Set((lesson.goalPairs||[]).flat());
+ for(const p of state.pairs){for(const n of p.names)line(n,final&&goalLines.has(n)?'highlight-ray final-ray':'highlight-ray proved-ray');if(p.kind==='parallel')for(const n of p.names){if(!proven.has(n))proven.set(n,new Set());for(const m of p.names)proven.get(n).add(m);}}
+ if(final)for(const p of lesson.goalPairs||[])for(const n of p)line(n,'highlight-ray final-ray');
+ const groups=[],visited=new Set();for(const name of proven.keys())if(!visited.has(name)){const group=[],todo=[name];while(todo.length){const n=todo.pop();if(visited.has(n))continue;visited.add(n);group.push(n);for(const q of proven.get(n)||[])todo.push(q);}groups.push(group);}groups.forEach((group,i)=>group.forEach(n=>arrow(n,Math.min(i+1,2),final&&goalLines.has(n))));
+ for(const a of lesson.diagram.angles)if(visible.has(a.name))angle(a,state,focus,goal&&lesson.goals.includes(a.name),final&&lesson.goals.includes(a.name));
+ for(const [index,group] of connectedGroups(lesson.diagram.equal||[]).entries()){const shown=group.map(n=>lesson.diagram.angles.find(a=>a.name===n)).filter(a=>a&&visible.has(a.name));if(shown.length>1)for(const a of shown)equalTick(a,index+1);}
+ for(const n of state.right){const a=lesson.diagram.angles.find(a=>a.name===n);if(a)rightMark(a);}
+ for(const n of lesson.diagram.symbols||[]){const a=lesson.diagram.angles.find(a=>a.name===n),g=geometry(a),p=xy(g.center,(g.a+g.b)/2,a.r*.62);$('arcs').append(svg('text',{x:p[0],y:p[1]+5,class:'angle-symbol'},a.symbol));}
+}
+function pause(){if(timer!==null)clearTimeout(timer);timer=null;$('play').textContent=step===last()?'重新播放':'自動播放';$('play').setAttribute('aria-pressed','false');}
+function keepEquality(s){return s.replace(/=\s*(\d+(?:°(?:\d+′)?)?)/g,'<span class="numeric-equality">= $1</span>');}
+function formula(row,calculated){const extra=calculated?row.calc:'',at=row.math.indexOf(' = ');if(at<0||row.reason==='已知'||row.reason==='設數'||row.math.includes('<br>'))return `<div class="formula">${keepEquality(row.math)}${keepEquality(extra)}</div>`;const lhs=row.math.slice(0,at),rhs=row.math.slice(at).trim();return `<div class="formula equation ${plain(lhs).length>7?'long-lhs':''}"><span class="eq-lhs">${lhs}</span><span class="eq-rhs">${keepEquality(rhs)}${keepEquality(extra)}</span></div>`;}
+function render(){
+ const f=frames[step],r=lesson.rows[f.row],state=rowState(),goal=f.kind==='goal',final=f.kind==='answer';
+ const idea=goal?lesson.task:final?(lesson.goals.length?'回看所求的角。':'回看所證明的直線關係。'):r.idea;
+ const spoken=showSolution&&!goal&&!final?plain(r.math+(state.calculated.has(f.row)?r.calc:'')):showSolution&&final?plain(lesson.answer):idea;
+ $('solution').hidden=!showSolution;$('show-solution').checked=showSolution;$('demo').setAttribute('data-solution',String(showSolution));$('thought').hidden=showSolution&&!goal;$('thought').textContent=idea;
+ $('proof').innerHTML=showSolution?lesson.rows.map((row,i)=>!state.visible.has(i)?'':`<div class="row ${i===f.row&&!final?'active':''}" role="button" tabindex="0" data-to="${i===0?0:frames.findIndex(x=>x.row===i)}" aria-label="查看第 ${i+1} 步：${row.reason}"><div class="cell"><span class="num">${i+1}.</span>${formula(row,state.calculated.has(i))}</div><div class="cell"><span class="num">${i+1}.</span><div>${row.reason}${row.seal?`<p class="proof-seal">${row.seal}</p>`:''}</div></div></div>`).join(''):'';
+ if(showSolution&&step!==previousStep&&!final){const row=$('proof').children[$('proof').children.length-1];if(row)row.classList.add('new');}
+ $('answer').hidden=!showSolution||!final;$('answer').innerHTML=showSolution&&final?`<span>${lesson.answer}</span>`:'';
+ $('range').max=last();$('range').value=step;$('range').setAttribute('aria-valuetext',spoken);$('count').textContent=`${step} / ${last()}`;$('prev').disabled=step===0;$('next').disabled=step===last();$('reset').disabled=step===0&&timer===null;
+ $('announce').textContent=spoken;$('figure-desc').textContent=spoken;if(timer===null)$('play').textContent=step===last()?'重新播放':'自動播放';draw(state);previousStep=step;
+}
+function go(n){pause();step=Math.max(0,Math.min(last(),n));render();}
+function advance(){if(step>=last()){pause();render();return;}step++;render();if(step===last()){pause();render();return;}timer=setTimeout(advance,3000);}
+function navigation(){$('chapters').innerHTML=CHAPTERS.map(([id,name])=>`<button type="button" data-chapter="${id}" aria-pressed="${lesson.chapter===id}">${name}</button>`).join('');$('questions').innerHTML=LESSONS.filter(p=>p.chapter===lesson.chapter).map(p=>`<button type="button" data-lesson="${p.id}" aria-pressed="${lesson.id===p.id}">第 ${p.number} 題</button>`).join('');}
+function select(id,n=0,update=true){
+ const selected=LESSONS.find(p=>p.id===id);if(!selected)return;pause();lesson=selected;showSolution=false;previousStep=-1;makeFrames();step=Math.max(0,Math.min(last(),n));navigation();
+ $('problem').innerHTML=`<p>${lesson.number}. 已知：${lesson.statement}</p><p>${lesson.task}</p>`;$('problem').setAttribute('aria-label',CHAPTERS.find(c=>c[0]===lesson.chapter)[1]+'第 '+lesson.number+' 題');initDiagram();render();if(update)history.replaceState(null,'','#'+lesson.id);
+}
+ $('next').onclick=()=>go(step+1);$('prev').onclick=()=>go(step-1);$('reset').onclick=()=>go(0);$('range').oninput=e=>go(Number(e.target.value));$('show-solution').onchange=e=>{pause();showSolution=e.target.checked;render();};
+ $('play').onclick=()=>{if(timer!==null){pause();render();return;}if(step===last()){step=0;render();}$('play').textContent='暫停';$('play').setAttribute('aria-pressed','true');timer=setTimeout(advance,1800);$('reset').disabled=false;};
+ $('chapters').addEventListener('click',e=>{const b=e.target.closest('[data-chapter]');if(b)select(LESSONS.find(p=>p.chapter===b.dataset.chapter).id);});$('questions').addEventListener('click',e=>{const b=e.target.closest('[data-lesson]');if(b)select(b.dataset.lesson);});
+ $('proof').addEventListener('click',e=>{const row=e.target.closest('[data-to]');if(row)go(Number(row.dataset.to));});$('proof').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const row=e.target.closest('[data-to]');if(row){e.preventDefault();go(Number(row.dataset.to));}}});
+ document.addEventListener('keydown',e=>{if(e.target.matches('input,button,[role="button"]'))return;if(e.key==='ArrowRight'){e.preventDefault();go(step+1);}if(e.key==='ArrowLeft'){e.preventDefault();go(step-1);}});document.addEventListener('visibilitychange',()=>{if(document.hidden){pause();render();}});
+ function fromHash(){const m=location.hash.match(/^#((?:cross|perp|parallel)-\d+)(?:\/(\d+))?$/);select(m?m[1]:LESSONS[0].id,m?Number(m[2]||0):0,false);}window.addEventListener('hashchange',fromHash);fromHash();
+})();
