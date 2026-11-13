@@ -21,7 +21,7 @@
 @media(max-width:359px){.continuation{padding-left:2em}.formula{font-size:15px}.frac{font-size:13px}.work{--proof-left:68.75%}.answer span{font-size:15px}}
 .page-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px}.page-head h1{margin:0}.solution-switch{display:inline-flex;align-items:center;gap:9px;min-height:44px;cursor:pointer;white-space:nowrap;font-size:14px}.solution-switch input{position:absolute;width:1px;height:1px;opacity:0}.switch-track{width:38px;height:22px;border-radius:12px;background:var(--muted);position:relative;transition:background .2s}.switch-track::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:white;transition:transform .2s}.solution-switch input:checked+.switch-track{background:var(--blue)}.solution-switch input:checked+.switch-track::after{transform:translateX(16px)}.solution-switch input:focus-visible+.switch-track{outline:2px solid var(--blue);outline-offset:4px}.main[data-solution="false"]{grid-template-columns:minmax(0,760px);justify-content:center}.main[data-solution="false"] .stage{position:static;grid-row:auto}.main[data-solution="false"] .figure{max-width:600px;margin-inline:auto}.thought{font-size:18px;font-weight:500;min-height:3.2em;margin:12px 5px 0;text-align:center;text-wrap:balance;line-height:1.6}.relation{fill:none;stroke:var(--blue);stroke-width:1.8;stroke-dasharray:6 5;animation:write .5s both}
 @media(max-width:760px){.page-head{margin-bottom:14px;gap:10px}.solution-switch{font-size:13px}.thought{font-size:16px;margin-top:14px}}
-.controls button{min-width:0;white-space:nowrap}.target-angle{stroke-dasharray:.07 .045;stroke-width:2.6}
+.controls button{min-width:0;white-space:nowrap}.target-angle{stroke-dasharray:.07 .045;stroke-width:2.6}.goal-name{font-size:20px;font-weight:500}
 @container animation (max-width:420px){.controls{gap:6px}.controls button{font-size:13px;padding-inline:3px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
@@ -87,24 +87,26 @@ function init(){
  $('labels').append(el('circle',{cx,cy,r:3.6,class:'point'}),el('text',{x:cx+2,y:cy+29,class:'letter'},'O'));
 }
 function angle(key,a,b,r,label,options={}){
- if(!showSolution&&!options.known&&label)label='?';
+ if(options.goal)label='?';
+ else if(!showSolution&&!options.known&&label)label='?';
  const path=el('path',{d:arc(a,b,r),class:`angle ${options.known?'known-arc ':''}${options.final?'final-angle ':''}${options.goal?'target-angle ':''}${options.enter?'enter':''}`,pathLength:1,'data-angle-name':key});
  $('arcs').append(path);
- if(label){const [x,y]=pos(options.labelAngle??((a+b)/2),options.labelR??r+25);$('arcs').append(el('text',{x,y:y+8,class:`angle-label ${options.known?'known-label ':''}${options.final?'final-label':''}`},label));}
+ if(options.goal){const [x,y]=pos(options.labelAngle??((a+b)/2),options.nameR??110);$('arcs').append(el('text',{x,y:y+7,class:'angle-label goal-name'},`∠${key}`));}
+ if(label){const [x,y]=pos(options.labelAngle??((a+b)/2),options.labelR??r+25);$('arcs').append(el('text',{x,y:y+8,class:`angle-label ${options.known?'known-label ':''}${options.goal?'goal-label ':''}${options.final?'final-label':''}`},label));}
 }
 function shade(a,b,r,final=false){$('shades').append(el('path',{d:sector(a,b,r),class:'sector'+(final?' final':''),'data-angle':`${a},${b}`}));}
 function ray(a){$('rays').append(el('path',{d:`M ${cx} ${cy} L ${pos(a,255)}`,class:'highlight-ray'}));}
-function tick(a){const p=pos(a,77),q=pos(a,91);$('arcs').append(el('path',{d:`M ${p} L ${q}`,class:'tick'}));}
+function tick(a,r=84){const p=pos(a,r-7),q=pos(a,r+7);$('arcs').append(el('path',{d:`M ${p} L ${q}`,class:'tick'}));}
 function draw(){
  for(const id of ['shades','rays','arcs'])$(id).replaceChildren();
  const fresh=step!==previousStep;
  angle('known',31,149,162,'118°',{known:true,labelR:189});
  if(step===0){
-  angle('EOA',149,180,84,'?',{goal:true,enter:fresh,labelR:119,labelAngle:164});
-  angle('AOC',180,211,84,'?',{goal:true,enter:fresh,labelR:119,labelAngle:196});
-  angle('BOC',0,-149,119,'?',{goal:true,enter:fresh,labelAngle:-71,labelR:154});
-  angle('BOD',0,31,84,'?',{goal:true,enter:fresh,labelR:124});
-  shade(149,211,84);shade(0,31,84);shade(0,-149,119);tick(164.5);tick(195.5);
+  angle('EOA',149,180,144,'?',{goal:true,enter:fresh,labelR:177,labelAngle:164});
+  angle('AOC',180,211,144,'?',{goal:true,enter:fresh,labelR:177,labelAngle:196});
+  angle('BOC',0,-149,200,'?',{goal:true,enter:fresh,labelAngle:-71,labelR:225,nameR:153});
+  angle('BOD',0,31,144,'?',{goal:true,enter:fresh,labelR:177});
+  shade(149,211,144);shade(0,31,144);shade(0,-149,200);tick(164.5,144);tick(195.5,144);
  }
  if(step===1||step===2){shade(149,211,132);ray(31);ray(211);angle('eoc',149,211,134,step===1?'?':'62°',{enter:fresh,labelAngle:180,labelR:169});}
  if(step>=3){
