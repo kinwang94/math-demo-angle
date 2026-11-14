@@ -27,10 +27,10 @@ function arrow(name,count,red){
  for(let i=0;i<count;i++){const c=[mid[0]+u[0]*(i-(count-1)/2)*14,mid[1]+u[1]*(i-(count-1)/2)*14],p=[c[0]-u[0]*6+n[0]*6,c[1]-u[1]*6+n[1]*6],q=[c[0]-u[0]*6-n[0]*6,c[1]-u[1]*6-n[1]*6];$('arcs').append(svg('path',{d:`M ${p} L ${c} L ${q}`,class:'parallel-mark'+(red?' red':''),'data-parallel':name}));}
 }
 function connectedGroups(groups){const edges=new Map();for(const group of groups)for(const a of group){if(!edges.has(a))edges.set(a,new Set());for(const b of group)edges.get(a).add(b);}const result=[],seen=new Set();for(const a of edges.keys())if(!seen.has(a)){const group=[],todo=[a];while(todo.length){const b=todo.pop();if(seen.has(b))continue;seen.add(b);group.push(b);for(const c of edges.get(b)||[])todo.push(c);}result.push(group);}return result;}
-function makeFrames(){frames=[{kind:'goal',row:0}];lesson.rows.slice(1).forEach((r,i)=>{frames.push({kind:'relation',row:i+1});if(r.calc)frames.push({kind:'calculation',row:i+1});});frames.push({kind:'answer',row:lesson.rows.length-1});}
+function makeFrames(){frames=[{kind:'diagram',row:0},{kind:'known',row:0},{kind:'goal',row:0}];lesson.rows.slice(1).forEach((r,i)=>{frames.push({kind:'relation',row:i+1});if(r.calc)frames.push({kind:'calculation',row:i+1});});frames.push({kind:'answer',row:lesson.rows.length-1});}
 function rowState(){
- const visible=new Set([0]),calculated=new Set(),revealed=new Set(lesson.diagram.known||[]),pairs=[],right=new Set(lesson.diagram.right||[]);
- for(const frame of frames.slice(1,step+1)){if(frame.kind==='answer')continue;visible.add(frame.row);const r=lesson.rows[frame.row];if(frame.kind==='calculation'||!r.calc){calculated.add(frame.row);for(const a of r.reveal)revealed.add(a);}if(frame.kind==='relation'){for(const p of r.pairs)pairs.push({names:p,kind:r.relation||'parallel'});for(const a of r.right||[])right.add(a);}}
+ const visible=new Set(step>0?[0]:[]),calculated=new Set(),revealed=new Set(lesson.diagram.known||[]),pairs=[],right=new Set(lesson.diagram.right||[]);
+ for(const frame of frames.slice(3,step+1)){if(frame.kind==='answer')continue;visible.add(frame.row);const r=lesson.rows[frame.row];if(frame.kind==='calculation'||!r.calc){calculated.add(frame.row);for(const a of r.reveal)revealed.add(a);}if(frame.kind==='relation'){for(const p of r.pairs)pairs.push({names:p,kind:r.relation||'parallel'});for(const a of r.right||[])right.add(a);}}
  return{visible,calculated,revealed,pairs,right};
 }
 function angle(a,state,focus,goal,final){
@@ -40,7 +40,7 @@ function angle(a,state,focus,goal,final){
  $('arcs').append(svg('path',{d:arc(g,a.r),class:css,pathLength:1,'data-angle-name':a.name}));
  const mid=a.labelAngle??((g.a+g.b)/2);
  let label=goal?'?':known?a.value:isValue?(showSolution&&state.revealed.has(a.name)?a.value:'?'):'';
- if(!known&&!goal&&((frames[step].kind==='goal')||(!active&&!state.revealed.has(a.name))))label='';
+ if(!known&&!goal&&(['known','goal'].includes(frames[step].kind)||(!active&&!state.revealed.has(a.name))))label='';
  if(goal){const p=xy(g.center,mid,a.nameR??a.r+105);$('arcs').append(svg('text',{x:p[0]+(a.nameDX||0),y:p[1]+7+(a.nameDY||0),class:'angle-label goal-name'},'∠'+a.name));}
  if(label){const p=xy(g.center,mid,a.labelR??a.r+28);$('arcs').append(svg('text',{x:p[0]+(a.labelDX||0),y:p[1]+8+(a.labelDY||0),class:`angle-label ${known?'known-label ':''}${goal?'goal-label ':''}${final?'final-label':''}`,'data-value-for':a.name},label));}
 }
@@ -50,10 +50,13 @@ function initDiagram(){
  for(const [name,p] of Object.entries(d.points)){$('labels').append(svg('circle',{cx:p[0],cy:p[1],r:2.7,class:'point'}));const label=d.labels[name]||[p[0]+13,p[1]-13];$('labels').append(svg('text',{x:label[0],y:label[1],class:'letter'},name));}
  $('figure-title').textContent=CHAPTERS.find(c=>c[0]===lesson.chapter)[1]+'，第 '+lesson.number+' 題';
 }
+function drawSymbols(original=false){for(const n of lesson.diagram.symbols||[]){const a=lesson.diagram.angles.find(a=>a.name===n),g=geometry(a),p=xy(g.center,(g.a+g.b)/2,a.r*.62);if(original)$('arcs').append(svg('path',{d:arc(g,a.r),class:'axis','data-original-angle':n}));$('arcs').append(svg('text',{x:p[0],y:p[1]+5,class:'angle-symbol'},a.symbol));}}
 function draw(state){
  for(const id of ['shades','rays','arcs'])$(id).replaceChildren();
  const f=frames[step],final=f.kind==='answer',goal=f.kind==='goal',r=lesson.rows[f.row];
- const focus=new Set(goal?[...lesson.goals,...(lesson.goalFocus||[])]:final?lesson.goals:r.focus),visible=new Set([...state.revealed,...focus,...(lesson.diagram.symbols||[])]);
+ if(f.kind==='diagram'){drawSymbols(true);return;}
+ const givens=[...(lesson.diagram.known||[]),...(lesson.diagram.right||[]),...(lesson.diagram.equal||[]).flat()];
+ const focus=new Set(f.kind==='known'?givens:goal?[...lesson.goals,...(lesson.goalFocus||[])]:final?lesson.goals:r.focus),visible=new Set([...givens,...state.revealed,...focus,...(lesson.diagram.symbols||[])]);
  if(goal)for(const p of lesson.goalPairs||[])for(const n of p)line(n,'highlight-ray target-line');
  const proven=new Map(),goalLines=new Set((lesson.goalPairs||[]).flat());
  for(const p of state.pairs){for(const n of p.names)line(n,final&&goalLines.has(n)?'highlight-ray final-ray':'highlight-ray proved-ray');if(p.kind==='parallel')for(const n of p.names){if(!proven.has(n))proven.set(n,new Set());for(const m of p.names)proven.get(n).add(m);}}
@@ -62,16 +65,16 @@ function draw(state){
  for(const a of lesson.diagram.angles)if(visible.has(a.name))angle(a,state,focus,goal&&lesson.goals.includes(a.name),final&&lesson.goals.includes(a.name));
  for(const [index,group] of connectedGroups(lesson.diagram.equal||[]).entries()){const shown=group.map(n=>lesson.diagram.angles.find(a=>a.name===n)).filter(a=>a&&visible.has(a.name));if(shown.length>1)for(const a of shown)equalTick(a,index+1);}
  for(const n of state.right){const a=lesson.diagram.angles.find(a=>a.name===n);if(a)rightMark(a);}
- for(const n of lesson.diagram.symbols||[]){const a=lesson.diagram.angles.find(a=>a.name===n),g=geometry(a),p=xy(g.center,(g.a+g.b)/2,a.r*.62);$('arcs').append(svg('text',{x:p[0],y:p[1]+5,class:'angle-symbol'},a.symbol));}
+ drawSymbols();
 }
 function pause(){if(timer!==null)clearTimeout(timer);timer=null;$('play').textContent=step===last()?'重新播放':'自動播放';$('play').setAttribute('aria-pressed','false');}
 function keepEquality(s){return s.replace(/=\s*(\d+(?:°(?:\d+′)?)?)/g,'<span class="numeric-equality">= $1</span>');}
 function formula(row,calculated){const extra=calculated?row.calc:'',at=row.math.indexOf(' = ');if(at<0||row.reason==='已知'||row.reason==='設數'||row.math.includes('<br>'))return `<div class="formula">${keepEquality(row.math)}${keepEquality(extra)}</div>`;const lhs=row.math.slice(0,at),rhs=row.math.slice(at).trim();return `<div class="formula equation ${plain(lhs).length>7?'long-lhs':''}"><span class="eq-lhs">${lhs}</span><span class="eq-rhs">${keepEquality(rhs)}${keepEquality(extra)}</span></div>`;}
 function render(){
- const f=frames[step],r=lesson.rows[f.row],state=rowState(),goal=f.kind==='goal',final=f.kind==='answer';
- const idea=goal?lesson.task:final?(lesson.goals.length?'回看所求的角。':'回看所證明的直線關係。'):r.idea;
- const spoken=showSolution&&!goal&&!final?plain(r.math+(state.calculated.has(f.row)?r.calc:'')):showSolution&&final?plain(lesson.answer):idea;
- $('solution').hidden=!showSolution;$('show-solution').checked=showSolution;$('demo').setAttribute('data-solution',String(showSolution));$('thought').hidden=showSolution&&!goal;$('thought').textContent=idea;
+ const f=frames[step],r=lesson.rows[f.row],state=rowState(),raw=f.kind==='diagram',goal=f.kind==='goal',final=f.kind==='answer';
+ const idea=raw?'原圖。':f.kind==='known'?plain(lesson.rows[0].math):goal?lesson.task:final?(lesson.goals.length?'回看所求的角。':'回看所證明的直線關係。'):r.idea;
+ const spoken=raw?idea:showSolution&&!goal&&!final?plain(r.math+(state.calculated.has(f.row)?r.calc:'')):showSolution&&final?plain(lesson.answer):idea;
+ $('solution').hidden=!showSolution||raw;$('show-solution').checked=showSolution;$('demo').setAttribute('data-solution',String(showSolution&&!raw));$('thought').hidden=showSolution&&!goal&&!raw;$('thought').textContent=raw?'':idea;
  $('proof').innerHTML=showSolution?lesson.rows.map((row,i)=>!state.visible.has(i)?'':`<div class="row ${i===f.row&&!final?'active':''}" role="button" tabindex="0" data-to="${i===0?0:frames.findIndex(x=>x.row===i)}" aria-label="查看第 ${i+1} 步：${row.reason}"><div class="cell"><span class="num">${i+1}.</span>${formula(row,state.calculated.has(i))}</div><div class="cell"><span class="num">${i+1}.</span><div>${row.reason}${row.seal?`<p class="proof-seal">${row.seal}</p>`:''}</div></div></div>`).join(''):'';
  if(showSolution&&step!==previousStep&&!final){const row=$('proof').children[$('proof').children.length-1];if(row)row.classList.add('new');}
  $('answer').hidden=!showSolution||!final;$('answer').innerHTML=showSolution&&final?`<span>${lesson.answer}</span>`:'';
