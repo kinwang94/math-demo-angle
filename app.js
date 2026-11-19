@@ -83,15 +83,47 @@ function render(){
 }
 function go(n){pause();step=Math.max(0,Math.min(last(),n));render();}
 function advance(){if(step>=last()){pause();render();return;}step++;render();if(step===last()){pause();render();return;}timer=setTimeout(advance,3000);}
-function navigation(){$('chapters').innerHTML=CHAPTERS.map(([id,name])=>`<button type="button" data-chapter="${id}" aria-pressed="${lesson.chapter===id}">${name}</button>`).join('');$('questions').innerHTML=LESSONS.filter(p=>p.chapter===lesson.chapter).map(p=>`<button type="button" data-lesson="${p.id}" aria-pressed="${lesson.id===p.id}">第 ${p.number} 題</button>`).join('');}
+function navigation(){
+ $('questions').innerHTML=CHAPTERS.map(([id,name])=>{
+  const buttons=LESSONS.filter(p=>p.chapter===id).map(p=>
+   `<button type="button" data-lesson="${p.id}"${lesson.id===p.id?' aria-current="true"':''}>第 ${p.number} 題</button>`
+  ).join('');
+  return `<section aria-labelledby="chapter-${id}"><h2 id="chapter-${id}">${name}</h2><div class="question-grid">${buttons}</div></section>`;
+ }).join('');
+}
+function setQuestionMenu(open,restoreFocus=false){
+ $('questions').hidden=!open;
+ const toggle=$('question-toggle');
+ toggle.setAttribute('aria-expanded',String(open));
+ if(restoreFocus)toggle.focus();
+}
 function select(id,n=0,update=true){
  const selected=LESSONS.find(p=>p.id===id);if(!selected)return;pause();lesson=selected;showSolution=false;previousStep=-1;makeFrames();step=Math.max(0,Math.min(last(),n));navigation();
  $('problem').innerHTML=`<p>${lesson.number}. 已知：${lesson.statement}</p><p>${lesson.task}</p>`;$('problem').setAttribute('aria-label',CHAPTERS.find(c=>c[0]===lesson.chapter)[1]+'第 '+lesson.number+' 題');initDiagram();render();if(update)history.replaceState(null,'','#'+lesson.id);
 }
  $('next').onclick=()=>go(step+1);$('prev').onclick=()=>go(step-1);$('reset').onclick=()=>go(0);$('range').oninput=e=>go(Number(e.target.value));$('show-solution').onchange=e=>{pause();showSolution=e.target.checked;render();};
  $('play').onclick=()=>{if(timer!==null){pause();render();return;}if(step===last()){step=0;render();}$('play').textContent='暫停';$('play').setAttribute('aria-pressed','true');timer=setTimeout(advance,1800);$('reset').disabled=false;};
- $('chapters').addEventListener('click',e=>{const b=e.target.closest('[data-chapter]');if(b)select(LESSONS.find(p=>p.chapter===b.dataset.chapter).id);});$('questions').addEventListener('click',e=>{const b=e.target.closest('[data-lesson]');if(b)select(b.dataset.lesson);});
+ $('question-toggle').addEventListener('click',()=>setQuestionMenu($('questions').hidden));
+ $('questions').addEventListener('click',e=>{
+  const button=e.target.closest('[data-lesson]');
+  if(!button)return;
+  setQuestionMenu(false,true);
+  select(button.dataset.lesson);
+ });
+ document.addEventListener('click',e=>{
+  if(!$('questions').hidden&&!$('question-picker').contains(e.target))setQuestionMenu(false);
+ });
+ document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&!$('questions').hidden){
+   e.preventDefault();
+   setQuestionMenu(false,true);
+   return;
+  }
+  if(e.target.matches?.('input,button,[role="button"]'))return;
+  if(e.key==='ArrowRight'){e.preventDefault();go(step+1);}
+  if(e.key==='ArrowLeft'){e.preventDefault();go(step-1);}
+ });
  $('proof').addEventListener('click',e=>{const row=e.target.closest('[data-to]');if(row)go(Number(row.dataset.to));});$('proof').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const row=e.target.closest('[data-to]');if(row){e.preventDefault();go(Number(row.dataset.to));}}});
- document.addEventListener('keydown',e=>{if(e.target.matches('input,button,[role="button"]'))return;if(e.key==='ArrowRight'){e.preventDefault();go(step+1);}if(e.key==='ArrowLeft'){e.preventDefault();go(step-1);}});document.addEventListener('visibilitychange',()=>{if(document.hidden){pause();render();}});
+ document.addEventListener('visibilitychange',()=>{if(document.hidden){pause();render();}});
  function fromHash(){const m=location.hash.match(/^#((?:cross|perp|parallel)-\d+)(?:\/(\d+))?$/);select(m?m[1]:LESSONS[0].id,m?Number(m[2]||0):0,false);}window.addEventListener('hashchange',fromHash);fromHash();
 })();
