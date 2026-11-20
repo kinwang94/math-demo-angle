@@ -170,30 +170,30 @@ return [
  R('∠CFE = ∠CFG + ∠GFE','角的和','∠2 在 FC 與 FG 之間，把它與直角合成 ∠CFE。',['2','GFE','CFE'],E('= 52° + 90° = 142°'),['CFE']),
  R('∠AEF + ∠CFE = ∠1 + ∠CFE','代入','再把 ∠AEF 與 ∠CFE 合起來，檢查同旁內角。',['AEF','CFE'],E('= 38° + 142° = 180°'),['AEF']),
  R('AB // CD','同旁內角互補，兩直線平行','兩個同旁內角互補，因此 AB 與 CD 平行。',['AEF','CFE'],'',[],[['AB','CD']])],answer:'∴ AB 與 CD 平行。'},
-{id:'page1-1',chapter:'page1',number:1,menuLabel:'兩直線的位置',menuWide:true,title:'兩直線的位置',statement:'在同一平面內，可以怎樣描述兩條直線的位置關係？',task:'比較兩組直線。',diagram:positions,goals:[],recap:'比較有交點和沒有交點的兩組直線。',answerLines:['AB','CD','EF','GH'],rows:[
+{id:'page1-1',chapter:'page1',number:1,title:'兩直線的位置',statement:'在同一平面內，可以怎樣描述兩條直線的位置關係？',task:'比較兩組直線。',diagram:positions,goals:[],recap:'比較有交點和沒有交點的兩組直線。',answerLines:['AB','CD','EF','GH'],rows:[
  K('直線 AB、CD 及直線 EF、GH 都在同一平面內。'),
  R('直線 AB 與 CD 相交於 O。','相交','左邊兩條直線在 O 相交。',[],'',[],[],{lines:['AB','CD']}),
  R('直線 EF // GH。','平行','右邊兩條直線向兩端延伸也不相交，因此互相平行。',[],'',[],[['EF','GH']])
 ],answer:'同一平面內，兩條不同的直線會相交或平行。'},
-{id:'page1-2',chapter:'page1',number:2,menuLabel:'對頂角與鄰補角',menuWide:true,title:'對頂角與鄰補角',statement:'兩條直線 AB、CD 相交，形成 ∠1、∠2、∠3 和 ∠4。',task:'以 ∠1 為例，找出它的對頂角和鄰補角。',diagram:anglePairs,goals:[],goalFocus:['1'],answerFocus:['1','2','3','4'],recap:'對頂角相等。鄰補角有一條公共邊，且和為 180°。',rows:[
+{id:'page1-2',chapter:'page1',number:2,title:'對頂角與鄰補角',statement:'兩條直線 AB、CD 相交，形成 ∠1、∠2、∠3 和 ∠4。',task:'以 ∠1 為例，找出它的對頂角和鄰補角。',diagram:anglePairs,goals:[],goalFocus:['1'],answerFocus:['1','2','3','4'],recap:'對頂角相等。鄰補角有一條公共邊，且和為 180°。',rows:[
  K('兩條直線在同一點相交，形成四個角。'),
  R('∠1 和 ∠3 互為對頂角，∠1 = ∠3。','對頂角','找與 ∠1 共頂點，而且兩邊分別反向延長的角。',['1','3']),
  R('∠1 和 ∠2 互為鄰補角。','公共邊 OA','取 OA 作公共邊，另一對邊 OC 和 OD 指向相反方向。',['1','2']),
  R('∠1 和 ∠4 互為鄰補角。','公共邊 OC','改取 OC 作公共邊，另一對邊 OA 和 OB 指向相反方向。',['1','4']),
  R('∠1 + ∠2 = 180°，∠1 + ∠4 = 180°。','平角定義','每組鄰補角合起來都是平角。',['1','2','4'])
 ],answer:'∠1 的對頂角是 ∠3，鄰補角是 ∠2 和 ∠4。'},
-{id:'page1-3',chapter:'page1',number:3,menuLabel:'填充 (1)',title:'填充 (1)',statement:'如圖，直線 AB、CD、EF 相交於點 O。',task:'∠AOC 的對頂角是 ______，∠EOB 的鄰補角是 ______。',diagram:fill1,goals:[],goalFocus:['AOC','EOB'],answerFocus:['BOD','AOE','BOF'],recap:'核對對頂角，並確認兩個鄰補角都找齊。',rows:[
+{id:'page1-3',chapter:'page1',number:3,title:'填充 (1)',statement:'如圖，直線 AB、CD、EF 相交於點 O。',task:'∠AOC 的對頂角是 ______，∠EOB 的鄰補角是 ______。',diagram:fill1,goals:[],goalFocus:['AOC','EOB'],answerFocus:['BOD','AOE','BOF'],recap:'核對對頂角，並確認兩個鄰補角都找齊。',rows:[
  K('直線 AB、CD、EF 相交於點 O。'),
  R('∠AOC 的對頂角是 ∠BOD。','對頂角','從 ∠AOC 的兩條邊各找反向延長線。',['AOC','BOD']),
  R('∠EOB 和 ∠AOE 互為鄰補角。','公共邊 OE','保留 OE，將 OB 反向延長。',['EOB','AOE']),
  R('∠EOB 和 ∠BOF 互為鄰補角。','公共邊 OB','再保留 OB，將 OE 反向延長。',['EOB','BOF'])
 ],answer:'∴ 對頂角：∠BOD。<br>　鄰補角：∠AOE、∠BOF。'},
-{id:'page1-4',chapter:'page1',number:4,menuLabel:'填充 (2)',title:'填充 (2)',statement:'如圖，直線 AB、CD 相交於點 O。',task:'∠AOD 的對頂角是 ______，∠AOE 的鄰補角是 ______。',diagram:fill2,goals:[],goalFocus:['AOD','AOE'],answerFocus:['BOC','BOE'],recap:'核對兩邊分別反向延長的角，以及有公共邊的鄰補角。',rows:[
+{id:'page1-4',chapter:'page1',number:4,title:'填充 (2)',statement:'如圖，直線 AB、CD 相交於點 O。',task:'∠AOD 的對頂角是 ______，∠AOE 的鄰補角是 ______。',diagram:fill2,goals:[],goalFocus:['AOD','AOE'],answerFocus:['BOC','BOE'],recap:'核對兩邊分別反向延長的角，以及有公共邊的鄰補角。',rows:[
  K('直線 AB、CD 相交於點 O，OE 是圖中的射線。'),
  R('∠AOD 的對頂角是 ∠BOC。','對頂角','沿 OA 和 OD 各找反向延長線。',['AOD','BOC']),
  R('∠AOE 的鄰補角是 ∠BOE。','公共邊 OE','保留 OE，把 OA 反向延長。',['AOE','BOE'])
 ],answer:'∴ 對頂角：∠BOC。<br>　鄰補角：∠BOE。'},
-{id:'page1-5',chapter:'page1',number:5,menuLabel:'填充 (3)',title:'填充 (3)',statement:'如圖，∠AOB = 90°，MN 是過點 O 的直線，∠1 = 22°。',task:'求 ∠2、∠3 和 ∠4 的度數。',diagram:fill3,goals:['2','3','4'],rows:[
+{id:'page1-5',chapter:'page1',number:5,title:'填充 (3)',statement:'如圖，∠AOB = 90°，MN 是過點 O 的直線，∠1 = 22°。',task:'求 ∠2、∠3 和 ∠4 的度數。',diagram:fill3,goals:['2','3','4'],rows:[
  K('∠AOB = 90°，M、O、N 共線，∠1 = 22°。'),
  R('∠2 = ∠AOB − ∠1','角的差','∠1 和 ∠2 合起來是直角。',['AOB','1','2'],E('= 90° − 22° = 68°'),['2']),
  R('∠3 = 180° − ∠1','鄰補角','∠3 和 ∠1 有公共邊 OB，合起來是平角。',['3','1'],E('= 180° − 22° = 158°'),['3']),

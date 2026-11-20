@@ -1,10 +1,10 @@
 'use strict';
 (()=>{
 const $=id=>document.getElementById(id),NS='http://www.w3.org/2000/svg';
-const LESSONS=window.GEOMETRY_LESSONS;
+const overview=document.body?.hasAttribute('data-overview')??false;
+const LESSONS=window.GEOMETRY_LESSONS.filter(p=>(p.chapter==='page1')===overview);
 const CHAPTERS=[['cross','兩直線相交'],['perp','兩直線垂直'],['parallel','平行線的判定']];
-const MENU_CHAPTERS=[['page1','第一頁上半部'],...CHAPTERS];
-let lesson=LESSONS[0],step=0,showSolution=false,timer=null,frames=[],previousStep=-1;
+let lesson=LESSONS[0],step=0,showSolution=overview,timer=null,frames=[],previousStep=-1;
 const last=()=>frames.length-1;
 const plain=s=>s.replace(/<span class="frac"[\s\S]*?<\/span><\/span>/g,'二分之一').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
 function svg(tag,attrs,text){const n=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);if(text!==undefined)n.textContent=text;return n;}
@@ -28,10 +28,21 @@ function arrow(name,count,red){
  for(let i=0;i<count;i++){const c=[mid[0]+u[0]*(i-(count-1)/2)*14,mid[1]+u[1]*(i-(count-1)/2)*14],p=[c[0]-u[0]*6+n[0]*6,c[1]-u[1]*6+n[1]*6],q=[c[0]-u[0]*6-n[0]*6,c[1]-u[1]*6-n[1]*6];$('arcs').append(svg('path',{d:`M ${p} L ${c} L ${q}`,class:'parallel-mark'+(red?' red':''),'data-parallel':name}));}
 }
 function connectedGroups(groups){const edges=new Map();for(const group of groups)for(const a of group){if(!edges.has(a))edges.set(a,new Set());for(const b of group)edges.get(a).add(b);}const result=[],seen=new Set();for(const a of edges.keys())if(!seen.has(a)){const group=[],todo=[a];while(todo.length){const b=todo.pop();if(seen.has(b))continue;seen.add(b);group.push(b);for(const c of edges.get(b)||[])todo.push(c);}result.push(group);}return result;}
-function makeFrames(){frames=[{kind:'diagram',row:0},{kind:'known',row:0},{kind:'goal',row:0}];lesson.rows.slice(1).forEach((r,i)=>{frames.push({kind:'relation',row:i+1});if(r.calc)frames.push({kind:'calculation',row:i+1});});frames.push({kind:'answer',row:lesson.rows.length-1});}
+function lessonFrames(item,opening){
+ const items=opening.map(kind=>({kind,row:0}));
+ item.rows.slice(1).forEach((r,i)=>{
+  items.push({kind:'relation',row:i+1});
+  if(r.calc)items.push({kind:'calculation',row:i+1});
+ });
+ items.push({kind:'answer',row:item.rows.length-1});
+ return items;
+}
 function rowState(){
  const visible=new Set(step>0?[0]:[]),calculated=new Set(),revealed=new Set(lesson.diagram.known||[]),pairs=[],right=new Set(lesson.diagram.right||[]);
- for(const frame of frames.slice(3,step+1)){if(frame.kind==='answer')continue;visible.add(frame.row);const r=lesson.rows[frame.row];if(frame.kind==='calculation'||!r.calc){calculated.add(frame.row);for(const a of r.reveal)revealed.add(a);}if(frame.kind==='relation'){for(const p of r.pairs)pairs.push({names:p,kind:r.relation||'parallel'});for(const a of r.right||[])right.add(a);}}
+ for(const frame of frames.slice(0,step+1)){
+  if((frame.lesson&&frame.lesson!==lesson)||!['relation','calculation'].includes(frame.kind))continue;
+  visible.add(frame.row);const r=lesson.rows[frame.row];if(frame.kind==='calculation'||!r.calc){calculated.add(frame.row);for(const a of r.reveal)revealed.add(a);}if(frame.kind==='relation'){for(const p of r.pairs)pairs.push({names:p,kind:r.relation||'parallel'});for(const a of r.right||[])right.add(a);}
+ }
  return{visible,calculated,revealed,pairs,right};
 }
 function angle(a,state,focus,goal,final){
@@ -75,22 +86,33 @@ function pause(){if(timer!==null)clearTimeout(timer);timer=null;$('play').textCo
 function keepEquality(s){return s.replace(/=\s*(\d+(?:°(?:\d+′)?)?)/g,'<span class="numeric-equality">= $1</span>');}
 function formula(row,calculated){const extra=calculated?row.calc:'',at=row.math.indexOf(' = ');if(at<0||row.reason==='已知'||row.reason==='設數'||row.math.includes('<br>'))return `<div class="formula">${keepEquality(row.math)}${keepEquality(extra)}</div>`;const lhs=row.math.slice(0,at),rhs=row.math.slice(at).trim();return `<div class="formula equation ${plain(lhs).length>7?'long-lhs':''}"><span class="eq-lhs">${lhs}</span><span class="eq-rhs">${keepEquality(rhs)}${keepEquality(extra)}</span></div>`;}
 function render(){
+ if(overview&&lesson!==frames[step].lesson){lesson=frames[step].lesson;initDiagram();}
  const f=frames[step],r=lesson.rows[f.row],state=rowState(),raw=f.kind==='diagram',goal=f.kind==='goal',final=f.kind==='answer';
+ if(overview){
+  const caption=f.kind==='intro'?lesson.task:final?plain(lesson.answer):f.kind==='relation'&&r.calc?r.idea:plain(r.math+(f.kind==='calculation'?r.calc:''));
+  $('overview-title').textContent=lesson.title;
+  paintFrame(caption,state);
+  return;
+ }
  const idea=raw?'原圖。':f.kind==='known'?plain(lesson.rows[0].math):goal?lesson.task:final?(lesson.recap||(lesson.goals.length?'回看所求的角。':'回看所證明的直線關係。')):r.idea;
  const spoken=raw?idea:showSolution&&!goal&&!final?plain(r.math+(state.calculated.has(f.row)?r.calc:'')):showSolution&&final?plain(lesson.answer):idea;
  $('solution').hidden=!showSolution||raw;$('show-solution').checked=showSolution;$('demo').setAttribute('data-solution',String(showSolution&&!raw));$('thought').hidden=showSolution&&!goal&&!raw;$('thought').textContent=raw?'':idea;
  $('proof').innerHTML=showSolution?lesson.rows.map((row,i)=>!state.visible.has(i)?'':`<div class="row ${i===f.row&&!final?'active':''}" role="button" tabindex="0" data-to="${i===0?0:frames.findIndex(x=>x.row===i)}" aria-label="查看第 ${i+1} 步：${row.reason}"><div class="cell"><span class="num">${i+1}.</span>${formula(row,state.calculated.has(i))}</div><div class="cell"><span class="num">${i+1}.</span><div>${row.reason}${row.seal?`<p class="proof-seal">${row.seal}</p>`:''}</div></div></div>`).join(''):'';
  if(showSolution&&step!==previousStep&&!final){const row=$('proof').children[$('proof').children.length-1];if(row)row.classList.add('new');}
  $('answer').hidden=!showSolution||!final;$('answer').innerHTML=showSolution&&final?`<span>${lesson.answer}</span>`:'';
+ paintFrame(spoken,state);
+}
+function paintFrame(spoken,state){
+ if(overview)$('thought').textContent=spoken;
  $('range').max=last();$('range').value=step;$('range').setAttribute('aria-valuetext',spoken);$('count').textContent=`${step} / ${last()}`;$('prev').disabled=step===0;$('next').disabled=step===last();$('reset').disabled=step===0&&timer===null;
  $('announce').textContent=spoken;$('figure-desc').textContent=spoken;if(timer===null)$('play').textContent=step===last()?'重新播放':'自動播放';draw(state);previousStep=step;
 }
 function go(n){pause();step=Math.max(0,Math.min(last(),n));render();}
 function advance(){if(step>=last()){pause();render();return;}step++;render();if(step===last()){pause();render();return;}timer=setTimeout(advance,3000);}
 function navigation(){
- $('questions').innerHTML=MENU_CHAPTERS.map(([id,name])=>{
+ $('questions').innerHTML=CHAPTERS.map(([id,name])=>{
   const buttons=LESSONS.filter(p=>p.chapter===id).map(p=>
-   `<button type="button" data-lesson="${p.id}"${p.menuWide?' class="wide-question"':''}${lesson.id===p.id?' aria-current="true"':''}>${p.menuLabel||('第 '+p.number+' 題')}</button>`
+   `<button type="button" data-lesson="${p.id}"${lesson.id===p.id?' aria-current="true"':''}>第 ${p.number} 題</button>`
   ).join('');
   return `<section aria-labelledby="chapter-${id}"><h2 id="chapter-${id}">${name}</h2><div class="question-grid">${buttons}</div></section>`;
  }).join('');
@@ -102,14 +124,26 @@ function setQuestionMenu(open,restoreFocus=false){
  if(restoreFocus)toggle.focus();
 }
 function select(id,n=0,update=true){
- const selected=LESSONS.find(p=>p.id===id);if(!selected)return;pause();lesson=selected;showSolution=false;previousStep=-1;makeFrames();step=Math.max(0,Math.min(last(),n));navigation();
- const heading=lesson.title?lesson.title+'：':lesson.number+'. 已知：';
- $('problem').innerHTML=`<p>${heading}${lesson.statement}</p><p>${lesson.task}</p>`;
- $('problem').setAttribute('aria-label',lesson.title||CHAPTERS.find(c=>c[0]===lesson.chapter)[1]+'第 '+lesson.number+' 題');
+ const selected=LESSONS.find(p=>p.id===id);if(!selected)return;pause();lesson=selected;showSolution=false;previousStep=-1;frames=lessonFrames(lesson,['diagram','known','goal']);step=Math.max(0,Math.min(last(),n));navigation();
+ $('problem').innerHTML=`<p>${lesson.number}. 已知：${lesson.statement}</p><p>${lesson.task}</p>`;
+ $('problem').setAttribute('aria-label',CHAPTERS.find(c=>c[0]===lesson.chapter)[1]+'第 '+lesson.number+' 題');
  initDiagram();render();if(update)history.replaceState(null,'','#'+lesson.id);
 }
- $('next').onclick=()=>go(step+1);$('prev').onclick=()=>go(step-1);$('reset').onclick=()=>go(0);$('range').oninput=e=>go(Number(e.target.value));$('show-solution').onchange=e=>{pause();showSolution=e.target.checked;render();};
+ $('next').onclick=()=>go(step+1);$('prev').onclick=()=>go(step-1);$('reset').onclick=()=>go(0);$('range').oninput=e=>go(Number(e.target.value));
  $('play').onclick=()=>{if(timer!==null){pause();render();return;}if(step===last()){step=0;render();}$('play').textContent='暫停';$('play').setAttribute('aria-pressed','true');timer=setTimeout(advance,1800);$('reset').disabled=false;};
+ document.addEventListener('keydown',e=>{
+  if(e.target.matches?.('input,button,[role="button"]'))return;
+  if(e.key==='ArrowRight'){e.preventDefault();go(step+1);}
+  if(e.key==='ArrowLeft'){e.preventDefault();go(step-1);}
+ });
+ document.addEventListener('visibilitychange',()=>{if(document.hidden){pause();render();}});
+ if(overview){
+  frames=LESSONS.flatMap(item=>lessonFrames(item,['intro']).map(frame=>({...frame,lesson:item})));
+  initDiagram();
+  render();
+  return;
+ }
+ $('show-solution').onchange=e=>{pause();showSolution=e.target.checked;render();};
  $('question-toggle').addEventListener('click',()=>setQuestionMenu($('questions').hidden));
  $('questions').addEventListener('click',e=>{
   const button=e.target.closest('[data-lesson]');
@@ -126,16 +160,11 @@ function select(id,n=0,update=true){
    setQuestionMenu(false,true);
    return;
   }
-  if(e.target.matches?.('input,button,[role="button"]'))return;
-  if(e.key==='ArrowRight'){e.preventDefault();go(step+1);}
-  if(e.key==='ArrowLeft'){e.preventDefault();go(step-1);}
  });
  $('proof').addEventListener('click',e=>{const row=e.target.closest('[data-to]');if(row)go(Number(row.dataset.to));});$('proof').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const row=e.target.closest('[data-to]');if(row){e.preventDefault();go(Number(row.dataset.to));}}});
- document.addEventListener('visibilitychange',()=>{if(document.hidden){pause();render();}});
  function fromHash(){
-  const [id,requestedStep]=location.hash.slice(1).split('/');
-  const matched=LESSONS.some(p=>p.id===id);
-  select(matched?id:LESSONS[0].id,matched&&/^\d+$/.test(requestedStep)?Number(requestedStep):0,false);
+  const match=location.hash.match(/^#((?:cross|perp|parallel)-\d+)(?:\/(\d+))?$/);
+  select(match?match[1]:LESSONS[0].id,match?Number(match[2]||0):0,false);
  }
  window.addEventListener('hashchange',fromHash);fromHash();
 })();

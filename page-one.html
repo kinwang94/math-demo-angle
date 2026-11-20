@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="逐步動畫示範兩直線相交、對頂角、鄰補角與第一頁三道填充題。">
+<meta name="theme-color" content="#F6F7F2">
+<title>工作紙第一頁上半部｜逐步動畫</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;900&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=page-one-playback">
+<script src="lessons.js?v=page-one-playback" defer></script>
+<script src="app.js?v=page-one-playback" defer></script>
+</head>
+<body class="overview" data-overview>
+<main class="main wrap" data-solution="false">
+<section class="card stage" aria-labelledby="overview-title">
+<h2 class="overview-title" id="overview-title"></h2>
+<p class="thought" id="thought"></p>
+<div class="figure">
+<svg id="figure" viewBox="0 0 640 510" role="img" aria-labelledby="figure-title figure-desc">
+<title id="figure-title">幾何圖形</title><desc id="figure-desc"></desc>
+<g id="shades"></g><g id="axes"></g><g id="rays"></g><g id="arcs"></g><g id="labels"></g>
+</svg>
+</div>
+<div class="controls"><button id="reset" aria-label="重新開始" title="重新開始">↺</button><button id="prev">上一步</button><button id="play" class="primary" aria-pressed="false">自動播放</button><button id="next">下一步</button></div>
+<div class="scrub"><input id="range" type="range" min="0" value="0" step="1" aria-label="動畫步驟"><output class="count" id="count" for="range"></output></div>
+<div id="announce" class="sr-only" role="status" aria-live="polite"></div>
+</section>
+<noscript><p>請開啟 JavaScript 以播放動畫。</p></noscript>
+</main>
+</body>
+</html>

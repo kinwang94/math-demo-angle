@@ -31,4 +31,5 @@
 .question-grid button{border-color:var(--grid);background:var(--card);padding-inline:4px;white-space:nowrap}
 .question-grid button[aria-current="true"]{background:var(--ink);border-color:var(--ink);color:var(--card)}
 .question-grid button[aria-current="true"]:hover{background:var(--blue)}
-.question-grid .wide-question{grid-column:span 3;text-align:left;padding-inline:12px}
+.overview-title{position:static;width:auto;transform:none;margin:8px 5px 0;padding:0}
+.overview .thought{display:grid;align-content:center;margin-top:6px;min-height:3.2em}
