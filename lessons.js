@@ -60,6 +60,31 @@ const parallel4={points:{A:[110,390],B:[530,390],C:[cx4,160],D:[180,160],E:[110+
 const parallel5={points:{A:[135,400],B:[240,400],C:[515,400],F:[135,145],E:[240,175.4],D:[515,255]},labels:{A:[120,423],B:[240,427],C:[530,422],F:[124,131],E:[240,155],D:[532,253]},segments:[['AC','AC'],['AF','AF'],['EB','EB'],['CD','CD'],['FD','FD']],angles:[A('FAC','FAC','90°',33),A('EBC','EBC','90°',33),A('BED','BED','',52),A('EDC','EDC','',52)],known:['BED','EDC'],right:['FAC','EBC']};
 const fy6=180+185*Math.tan(38*Math.PI/180),gx6=235+115*Math.cos(128*Math.PI/180),gy6=fy6-115*Math.sin(128*Math.PI/180);
 const parallel6={points:{A:[150,180],B:[555,180],E:[420,180],C:[80,fy6],D:[550,fy6],F:[235,fy6],G:[gx6,gy6]},labels:{A:[135,187],B:[571,187],E:[410,156],C:[65,fy6+8],D:[565,fy6+8],F:[241,fy6+29],G:[gx6-17,gy6-7]},segments:[['AB','AB'],['CD','CD'],['EF',[[155,fy6+80*Math.tan(38*Math.PI/180)],[510,180-90*Math.tan(38*Math.PI/180)]]],['GF','FG']],angles:[A('1',null,'38°',53,{vertex:'E',a:0,b:38,labelR:83,symbol:'1'}),A('2','CFG','52°',44,{labelR:73,symbol:'2'}),A('GFE','GFE','90°',40),A('CFE','CFE','142°',87,{labelR:115,labelAngle:112}),A('AEF','AEF','38°',50)],known:['1','2'],right:['GFE'],symbols:['1','2']};
+
+const positions={
+ points:{A:[58,319],B:[273,181],C:[58,181],D:[273,319],O:[165.5,250],E:[365,242],F:[580,148],G:[365,342],H:[580,248]},
+ labels:{A:[47,345],B:[278,168],C:[48,170],D:[286,343],O:[165.5,281],E:[355,268],F:[586,135],G:[355,368],H:[591,233]},
+ segments:[['AB','AB'],['CD','CD'],['EF','EF'],['GH','GH']],angles:[]
+};
+const anglePairs=radial({A:210,B:30,C:150,D:330},[
+ A('1','AOC','',62,{symbol:'1'}),A('2','AOD','',62,{symbol:'2'}),
+ A('3','BOD','',62,{symbol:'3'}),A('4','BOC','',62,{symbol:'4'})
+],{center:[320,253],radius:226,symbols:['1','2','3','4'],originLabel:[320,274]});
+const fill1=radial({A:180,B:0,C:210,D:30,E:150,F:330},[
+ A('AOC','AOC','',72),A('BOD','BOD','',72),A('EOB','EOB','',123),
+ A('AOE','AOE','',123),A('BOF','BOF','',123)
+],{radius:229,originLabel:[318,282]});
+const fill2=radial({A:180,B:0,C:235,D:55,E:127},[
+ A('AOD','AOD','',85),A('BOC','BOC','',85),A('AOE','AOE','',126),A('BOE','BOE','',126)
+],{radius:229,originLabel:[337,270]});
+const fill3=radial({M:180,N:0,A:292,B:22},[
+ A('AOB','AOB','90°',146,{labelAngle:-11,labelR:184}),
+ A('1','BON','22°',77,{symbol:'1',labelR:119}),
+ A('2','NOA','68°',77,{symbol:'2',labelR:114,nameR:191}),
+ A('3','MOB','158°',121,{symbol:'3',labelR:152,nameR:207}),
+ A('4','MOA','112°',121,{symbol:'4',labelR:153,nameR:207})
+],{center:[320,234],radius:221,known:['AOB','1'],right:['AOB'],symbols:['1','2','3','4'],originLabel:[300,260]});
+
 return [
 {id:'cross-1',chapter:'cross',number:1,page:1,statement:'直線 AB 與 CD 相交於 O 點，OA 平分 ∠EOC，∠EOD = 118°。',task:'求 ∠EOA、∠AOC、∠BOC 和 ∠BOD 的度數。',diagram:cross1,goals:['EOA','AOC','BOC','BOD'],rows:[
  K('AB、CD 相交於 O，<br>OA 平分 ∠EOC，∠EOD = 118°。'),
@@ -144,6 +169,35 @@ return [
  R('∠GFE = 90°','垂直定義','先從 GF 垂直 EF 找出直角。',['GFE'],'',['GFE']),
  R('∠CFE = ∠CFG + ∠GFE','角的和','∠2 在 FC 與 FG 之間，把它與直角合成 ∠CFE。',['2','GFE','CFE'],E('= 52° + 90° = 142°'),['CFE']),
  R('∠AEF + ∠CFE = ∠1 + ∠CFE','代入','再把 ∠AEF 與 ∠CFE 合起來，檢查同旁內角。',['AEF','CFE'],E('= 38° + 142° = 180°'),['AEF']),
- R('AB // CD','同旁內角互補，兩直線平行','兩個同旁內角互補，因此 AB 與 CD 平行。',['AEF','CFE'],'',[],[['AB','CD']])],answer:'∴ AB 與 CD 平行。'}
+ R('AB // CD','同旁內角互補，兩直線平行','兩個同旁內角互補，因此 AB 與 CD 平行。',['AEF','CFE'],'',[],[['AB','CD']])],answer:'∴ AB 與 CD 平行。'},
+{id:'page1-1',chapter:'page1',number:1,menuLabel:'兩直線的位置',menuWide:true,title:'兩直線的位置',statement:'在同一平面內，可以怎樣描述兩條直線的位置關係？',task:'比較兩組直線。',diagram:positions,goals:[],recap:'比較有交點和沒有交點的兩組直線。',answerLines:['AB','CD','EF','GH'],rows:[
+ K('直線 AB、CD 及直線 EF、GH 都在同一平面內。'),
+ R('直線 AB 與 CD 相交於 O。','相交','左邊兩條直線在 O 相交。',[],'',[],[],{lines:['AB','CD']}),
+ R('直線 EF // GH。','平行','右邊兩條直線向兩端延伸也不相交，因此互相平行。',[],'',[],[['EF','GH']])
+],answer:'同一平面內，兩條不同的直線會相交或平行。'},
+{id:'page1-2',chapter:'page1',number:2,menuLabel:'對頂角與鄰補角',menuWide:true,title:'對頂角與鄰補角',statement:'兩條直線 AB、CD 相交，形成 ∠1、∠2、∠3 和 ∠4。',task:'以 ∠1 為例，找出它的對頂角和鄰補角。',diagram:anglePairs,goals:[],goalFocus:['1'],answerFocus:['1','2','3','4'],recap:'對頂角相等。鄰補角有一條公共邊，且和為 180°。',rows:[
+ K('兩條直線在同一點相交，形成四個角。'),
+ R('∠1 和 ∠3 互為對頂角，∠1 = ∠3。','對頂角','找與 ∠1 共頂點，而且兩邊分別反向延長的角。',['1','3']),
+ R('∠1 和 ∠2 互為鄰補角。','公共邊 OA','取 OA 作公共邊，另一對邊 OC 和 OD 指向相反方向。',['1','2']),
+ R('∠1 和 ∠4 互為鄰補角。','公共邊 OC','改取 OC 作公共邊，另一對邊 OA 和 OB 指向相反方向。',['1','4']),
+ R('∠1 + ∠2 = 180°，∠1 + ∠4 = 180°。','平角定義','每組鄰補角合起來都是平角。',['1','2','4'])
+],answer:'∠1 的對頂角是 ∠3，鄰補角是 ∠2 和 ∠4。'},
+{id:'page1-3',chapter:'page1',number:3,menuLabel:'填充 (1)',title:'填充 (1)',statement:'如圖，直線 AB、CD、EF 相交於點 O。',task:'∠AOC 的對頂角是 ______，∠EOB 的鄰補角是 ______。',diagram:fill1,goals:[],goalFocus:['AOC','EOB'],answerFocus:['BOD','AOE','BOF'],recap:'核對對頂角，並確認兩個鄰補角都找齊。',rows:[
+ K('直線 AB、CD、EF 相交於點 O。'),
+ R('∠AOC 的對頂角是 ∠BOD。','對頂角','從 ∠AOC 的兩條邊各找反向延長線。',['AOC','BOD']),
+ R('∠EOB 和 ∠AOE 互為鄰補角。','公共邊 OE','保留 OE，將 OB 反向延長。',['EOB','AOE']),
+ R('∠EOB 和 ∠BOF 互為鄰補角。','公共邊 OB','再保留 OB，將 OE 反向延長。',['EOB','BOF'])
+],answer:'∴ 對頂角：∠BOD。<br>　鄰補角：∠AOE、∠BOF。'},
+{id:'page1-4',chapter:'page1',number:4,menuLabel:'填充 (2)',title:'填充 (2)',statement:'如圖，直線 AB、CD 相交於點 O。',task:'∠AOD 的對頂角是 ______，∠AOE 的鄰補角是 ______。',diagram:fill2,goals:[],goalFocus:['AOD','AOE'],answerFocus:['BOC','BOE'],recap:'核對兩邊分別反向延長的角，以及有公共邊的鄰補角。',rows:[
+ K('直線 AB、CD 相交於點 O，OE 是圖中的射線。'),
+ R('∠AOD 的對頂角是 ∠BOC。','對頂角','沿 OA 和 OD 各找反向延長線。',['AOD','BOC']),
+ R('∠AOE 的鄰補角是 ∠BOE。','公共邊 OE','保留 OE，把 OA 反向延長。',['AOE','BOE'])
+],answer:'∴ 對頂角：∠BOC。<br>　鄰補角：∠BOE。'},
+{id:'page1-5',chapter:'page1',number:5,menuLabel:'填充 (3)',title:'填充 (3)',statement:'如圖，∠AOB = 90°，MN 是過點 O 的直線，∠1 = 22°。',task:'求 ∠2、∠3 和 ∠4 的度數。',diagram:fill3,goals:['2','3','4'],rows:[
+ K('∠AOB = 90°，M、O、N 共線，∠1 = 22°。'),
+ R('∠2 = ∠AOB − ∠1','角的差','∠1 和 ∠2 合起來是直角。',['AOB','1','2'],E('= 90° − 22° = 68°'),['2']),
+ R('∠3 = 180° − ∠1','鄰補角','∠3 和 ∠1 有公共邊 OB，合起來是平角。',['3','1'],E('= 180° − 22° = 158°'),['3']),
+ R('∠4 = 180° − ∠2','鄰補角','∠4 和 ∠2 有公共邊 OA，合起來是平角。',['4','2'],E('= 180° − 68° = 112°'),['4'])
+],answer:'∴ ∠2 = 68°，∠3 = 158°，∠4 = 112°。'}
 ];
 })();
