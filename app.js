@@ -9,7 +9,8 @@ const last=()=>frames.length-1;
 const plain=s=>s.replace(/<span class="frac"[\s\S]*?<\/span><\/span>/g,'二分之一').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
 function svg(tag,attrs,text){const n=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);if(text!==undefined)n.textContent=text;return n;}
 function xy(center,a,r){const t=a*Math.PI/180;return[center[0]+r*Math.cos(t),center[1]-r*Math.sin(t)];}
-function arc(g,r){return `M ${xy(g.center,g.a,r)} A ${r} ${r} 0 ${Math.abs(g.b-g.a)>180?1:0} ${g.b>g.a?0:1} ${xy(g.center,g.b,r)}`;}
+function arcEnd(g,r){return `A ${r} ${r} 0 ${Math.abs(g.b-g.a)>180?1:0} ${g.b>g.a?0:1} ${xy(g.center,g.b,r)}`;}
+function arc(g,r){return `M ${xy(g.center,g.a,r)} ${arcEnd(g,r)}`;}
 function geometry(a){
  const p=lesson.diagram.points;
  if(a.vertex)return{center:p[a.vertex],a:a.a,b:a.b};
@@ -58,14 +59,91 @@ function angle(a,state,focus,goal,final){
 }
 function initDiagram(){
  for(const id of ['axes','labels'])$(id).replaceChildren();const d=lesson.diagram;
+ if(lesson.concept){
+  $('figure-title').textContent=lesson.title;
+  return;
+ }
  for(const [name] of d.segments){const [a,b]=segment(name);$('axes').append(svg('path',{d:`M ${a} L ${b}`,class:'axis'}));}
  for(const [name,p] of Object.entries(d.points)){$('labels').append(svg('circle',{cx:p[0],cy:p[1],r:2.7,class:'point'}));const label=d.labels[name]||[p[0]+13,p[1]-13];$('labels').append(svg('text',{x:label[0],y:label[1],class:'letter'},name));}
  $('figure-title').textContent=lesson.title||CHAPTERS.find(c=>c[0]===lesson.chapter)[1]+'，第 '+lesson.number+' 題';
 }
 function drawSymbols(original=false){for(const n of lesson.diagram.symbols||[]){const a=lesson.diagram.angles.find(a=>a.name===n),g=geometry(a),p=xy(g.center,(g.a+g.b)/2,a.r*.62);if(original)$('arcs').append(svg('path',{d:arc(g,a.r),class:'axis','data-original-angle':n}));$('arcs').append(svg('text',{x:p[0],y:p[1]+5,class:'angle-symbol'},a.symbol));}}
+function drawMovingLines(motion,animate){
+ const pivot=[320,195],fixedY=290,tilt=32;
+ const crossing=motion==='intersect';
+ const rotation=crossing?tilt:0;
+ const moving=svg('g',{transform:`rotate(${rotation} ${pivot.join(' ')})`,'data-moving-line':''});
+ $('rays').append(
+  svg('path',{d:`M 55 ${fixedY} H 585`,class:'axis'}),
+  moving
+ );
+ moving.append(svg('path',{d:`M 55 ${pivot[1]} H 585`,class:'concept-ray blue'}));
+ if(animate){
+  const from=crossing?0:tilt;
+  const turn=svg('animateTransform',{
+   attributeName:'transform',type:'rotate',begin:'indefinite',
+   from:`${from} ${pivot.join(' ')}`,to:`${rotation} ${pivot.join(' ')}`,
+   dur:'1.05s',fill:'freeze',calcMode:'spline',keySplines:'.4 0 .2 1'
+  });
+  moving.append(turn);
+  if(turn.beginElement){
+   moving.setAttribute('transform',`rotate(${from} ${pivot.join(' ')})`);
+   turn.beginElement();
+  }
+ }
+ if(crossing){
+  const intersectionX=pivot[0]+(fixedY-pivot[1])/Math.tan(tilt*Math.PI/180);
+  const mark=svg('g',{class:animate?'concept-reveal intersection-reveal':''});
+  $('arcs').append(mark);
+  mark.append(
+   svg('circle',{cx:intersectionX,cy:fixedY,r:6,class:'concept-intersection'}),
+   svg('text',{x:intersectionX-9,y:fixedY+34,class:'letter'},'O')
+  );
+ }
+}
+function drawExtendingAngles(motion,animate){
+ const {points,labels,angles}=lesson.diagram;
+ const center=points.O;
+ const shared=motion==='other-adjacent'?'C':['common','adjacent'].includes(motion)?'A':'';
+ const extensions={
+  adjacent:['D'],'other-adjacent':['B'],vertical:['B','D'],summary:['B','D']
+ }[motion]||[];
+ const addedAngles={adjacent:['2'],'other-adjacent':['4'],vertical:['3'],summary:['2','3','4']}[motion]||[];
+ const rays=$('rays'),marks=$('arcs');
+ for(const endpoint of ['A','C',...extensions]){
+  const extended=extensions.includes(endpoint);
+  const color=endpoint===shared?'amber':extended?'blue':'';
+  const drawing=animate&&extended;
+  rays.append(svg('path',{d:`M ${center} L ${points[endpoint]}`,pathLength:1,
+   class:`concept-ray ${color}${drawing?' concept-grow':''}`,'data-concept-ray':endpoint}));
+  marks.append(svg('text',{x:labels[endpoint][0],y:labels[endpoint][1],
+   class:`letter${drawing?' concept-reveal':''}`},endpoint));
+ }
+ marks.append(svg('circle',{cx:center[0],cy:center[1],r:4,class:'point'}),
+  svg('text',{x:center[0],y:center[1]+26,class:'letter'},'O'));
+ for(const a of angles.filter(a=>a.name==='1'||addedAngles.includes(a.name))){
+  const g=geometry(a),r=82;
+  const [x,y]=xy(center,(g.a+g.b)/2,54);
+  const tone=a.name==='2'||a.name==='4'?'amber':'blue';
+  const result=svg('g',{class:animate&&a.name!=='1'?'concept-reveal':'','data-concept-angle':a.name});
+  marks.append(result);
+  result.append(
+   svg('path',{d:`M ${center} L ${xy(center,g.a,r)} ${arcEnd(g,r)} Z`,class:`concept-sector ${tone}`}),
+   svg('path',{d:arc(g,r),class:`concept-ray ${tone}`}),
+   svg('text',{x,y:y+7,class:'concept-angle-number'},a.symbol)
+  );
+ }
+}
 function draw(state){
  for(const id of ['shades','rays','arcs'])$(id).replaceChildren();
  const f=frames[step],final=f.kind==='answer',goal=f.kind==='goal',r=lesson.rows[f.row];
+ if(lesson.concept){
+  const motion=final?'summary':f.kind==='relation'?r.motion:'original';
+  const animate=Boolean(r.motion&&f.kind==='relation'&&step!==previousStep&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
+  if(lesson.concept==='lines')drawMovingLines(motion,animate);
+  else drawExtendingAngles(motion,animate);
+  return;
+ }
  if(f.kind==='diagram'){drawSymbols(true);return;}
  const givens=[...(lesson.diagram.known||[]),...(lesson.diagram.right||[]),...(lesson.diagram.equal||[]).flat()];
  const answerAngles=lesson.answerFocus||lesson.goals;

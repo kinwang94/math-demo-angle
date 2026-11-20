@@ -61,11 +61,6 @@ const parallel5={points:{A:[135,400],B:[240,400],C:[515,400],F:[135,145],E:[240,
 const fy6=180+185*Math.tan(38*Math.PI/180),gx6=235+115*Math.cos(128*Math.PI/180),gy6=fy6-115*Math.sin(128*Math.PI/180);
 const parallel6={points:{A:[150,180],B:[555,180],E:[420,180],C:[80,fy6],D:[550,fy6],F:[235,fy6],G:[gx6,gy6]},labels:{A:[135,187],B:[571,187],E:[410,156],C:[65,fy6+8],D:[565,fy6+8],F:[241,fy6+29],G:[gx6-17,gy6-7]},segments:[['AB','AB'],['CD','CD'],['EF',[[155,fy6+80*Math.tan(38*Math.PI/180)],[510,180-90*Math.tan(38*Math.PI/180)]]],['GF','FG']],angles:[A('1',null,'38°',53,{vertex:'E',a:0,b:38,labelR:83,symbol:'1'}),A('2','CFG','52°',44,{labelR:73,symbol:'2'}),A('GFE','GFE','90°',40),A('CFE','CFE','142°',87,{labelR:115,labelAngle:112}),A('AEF','AEF','38°',50)],known:['1','2'],right:['GFE'],symbols:['1','2']};
 
-const positions={
- points:{A:[58,319],B:[273,181],C:[58,181],D:[273,319],O:[165.5,250],E:[365,242],F:[580,148],G:[365,342],H:[580,248]},
- labels:{A:[47,345],B:[278,168],C:[48,170],D:[286,343],O:[165.5,281],E:[355,268],F:[586,135],G:[355,368],H:[591,233]},
- segments:[['AB','AB'],['CD','CD'],['EF','EF'],['GH','GH']],angles:[]
-};
 const anglePairs=radial({A:210,B:30,C:150,D:330},[
  A('1','AOC','',62,{symbol:'1'}),A('2','AOD','',62,{symbol:'2'}),
  A('3','BOD','',62,{symbol:'3'}),A('4','BOC','',62,{symbol:'4'})
@@ -170,18 +165,19 @@ return [
  R('∠CFE = ∠CFG + ∠GFE','角的和','∠2 在 FC 與 FG 之間，把它與直角合成 ∠CFE。',['2','GFE','CFE'],E('= 52° + 90° = 142°'),['CFE']),
  R('∠AEF + ∠CFE = ∠1 + ∠CFE','代入','再把 ∠AEF 與 ∠CFE 合起來，檢查同旁內角。',['AEF','CFE'],E('= 38° + 142° = 180°'),['AEF']),
  R('AB // CD','同旁內角互補，兩直線平行','兩個同旁內角互補，因此 AB 與 CD 平行。',['AEF','CFE'],'',[],[['AB','CD']])],answer:'∴ AB 與 CD 平行。'},
-{id:'page1-1',chapter:'page1',number:1,title:'兩直線的位置',statement:'在同一平面內，可以怎樣描述兩條直線的位置關係？',task:'比較兩組直線。',diagram:positions,goals:[],recap:'比較有交點和沒有交點的兩組直線。',answerLines:['AB','CD','EF','GH'],rows:[
- K('直線 AB、CD 及直線 EF、GH 都在同一平面內。'),
- R('直線 AB 與 CD 相交於 O。','相交','左邊兩條直線在 O 相交。',[],'',[],[],{lines:['AB','CD']}),
- R('直線 EF // GH。','平行','右邊兩條直線向兩端延伸也不相交，因此互相平行。',[],'',[],[['EF','GH']])
+{id:'page1-1',chapter:'page1',number:1,title:'兩直線的位置',task:'轉動其中一條直線，留意兩線有沒有交點。',concept:'lines',diagram:{},goals:[],rows:[
+ K('兩條不同的直線在同一平面內。'),
+ R('轉動藍線。兩線交於 O，這叫做相交。','相交','找出交點。',[],'',[],[],{motion:'intersect'}),
+ R('把藍線轉回原方向。兩條直線平行，沒有交點。','平行','比較兩線的方向。',[],'',[],[],{motion:'parallel'})
 ],answer:'同一平面內，兩條不同的直線會相交或平行。'},
-{id:'page1-2',chapter:'page1',number:2,title:'對頂角與鄰補角',statement:'兩條直線 AB、CD 相交，形成 ∠1、∠2、∠3 和 ∠4。',task:'以 ∠1 為例，找出它的對頂角和鄰補角。',diagram:anglePairs,goals:[],goalFocus:['1'],answerFocus:['1','2','3','4'],recap:'對頂角相等。鄰補角有一條公共邊，且和為 180°。',rows:[
- K('兩條直線在同一點相交，形成四個角。'),
- R('∠1 和 ∠3 互為對頂角，∠1 = ∠3。','對頂角','找與 ∠1 共頂點，而且兩邊分別反向延長的角。',['1','3']),
- R('∠1 和 ∠2 互為鄰補角。','公共邊 OA','取 OA 作公共邊，另一對邊 OC 和 OD 指向相反方向。',['1','2']),
- R('∠1 和 ∠4 互為鄰補角。','公共邊 OC','改取 OC 作公共邊，另一對邊 OA 和 OB 指向相反方向。',['1','4']),
- R('∠1 + ∠2 = 180°，∠1 + ∠4 = 180°。','平角定義','每組鄰補角合起來都是平角。',['1','2','4'])
-],answer:'∠1 的對頂角是 ∠3，鄰補角是 ∠2 和 ∠4。'},
+{id:'page1-2',chapter:'page1',number:2,title:'鄰補角與對頂角',task:'從 ∠1 出發，看看延長角的邊會形成甚麼角。',concept:'angles',diagram:anglePairs,goals:[],rows:[
+ K('∠1 的頂點是 O，兩邊為 OA 和 OC。'),
+ R('保留 OA。它會成為兩個角的公共邊。','公共邊','保留 OA。',[],'',[],[],{motion:'common'}),
+ R('把 CO 延長至 D。∠1 和 ∠2 有公共邊 OA，另外兩邊方向相反，互為鄰補角。','鄰補角','延長 CO。',[],'',[],[],{motion:'adjacent'}),
+ R('換用 OC 作公共邊，把 AO 延長至 B。∠1 和 ∠4 也是鄰補角。','鄰補角','延長 AO。',[],'',[],[],{motion:'other-adjacent'}),
+ R('回到 ∠1。這次把它的兩條邊分別反向延長。','公共頂點','從頂點 O 延長。',[],'',[],[],{motion:'original'}),
+ R('把 AO、CO 分別延長至 B、D。∠1 和 ∠3 共用頂點 O，兩邊各自反向延長，互為對頂角。','對頂角','同時延長兩條邊。',[],'',[],[],{motion:'vertical'})
+],answer:'∠1 和 ∠3 互為對頂角。∠1 的鄰補角是 ∠2 和 ∠4。'},
 {id:'page1-3',chapter:'page1',number:3,title:'填充 (1)',statement:'如圖，直線 AB、CD、EF 相交於點 O。',task:'∠AOC 的對頂角是 ______，∠EOB 的鄰補角是 ______。',diagram:fill1,goals:[],goalFocus:['AOC','EOB'],answerFocus:['BOD','AOE','BOF'],recap:'核對對頂角，並確認兩個鄰補角都找齊。',rows:[
  K('直線 AB、CD、EF 相交於點 O。'),
  R('∠AOC 的對頂角是 ∠BOD。','對頂角','從 ∠AOC 的兩條邊各找反向延長線。',['AOC','BOD']),
