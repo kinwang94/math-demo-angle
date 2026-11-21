@@ -9,13 +9,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;900&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=concept-motion">
-<script src="lessons.js?v=concept-motion" defer></script>
-<script src="app.js?v=concept-motion" defer></script>
+<link rel="stylesheet" href="styles.css?v=visual-concepts">
+<script src="lessons.js?v=visual-concepts" defer></script>
+<script src="app.js?v=visual-concepts" defer></script>
 </head>
 <body class="overview" data-overview>
-<main class="main wrap" data-solution="false">
-<section class="card stage" aria-labelledby="overview-title">
+<main class="overview-layout wrap">
+<nav class="overview-nav" aria-label="選擇動畫">
+<button id="overview-concepts" type="button" aria-pressed="true" aria-controls="overview-stage">概念</button>
+<button id="overview-exercises" type="button" aria-pressed="false" aria-controls="overview-stage">填充題</button>
+</nav>
+<section class="card stage" id="overview-stage" aria-labelledby="overview-title">
 <h2 class="overview-title" id="overview-title"></h2>
 <p class="thought" id="thought"></p>
 <div class="figure">

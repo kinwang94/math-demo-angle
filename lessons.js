@@ -169,15 +169,16 @@ return [
  K('兩條不同的直線在同一平面內。'),
  R('轉動藍線。兩線交於 O，這叫做相交。','相交','找出交點。',[],'',[],[],{motion:'intersect'}),
  R('把藍線轉回原方向。兩條直線平行，沒有交點。','平行','比較兩線的方向。',[],'',[],[],{motion:'parallel'})
-],answer:'同一平面內，兩條不同的直線會相交或平行。'},
-{id:'page1-2',chapter:'page1',number:2,title:'鄰補角與對頂角',task:'從 ∠1 出發，看看延長角的邊會形成甚麼角。',concept:'angles',diagram:anglePairs,goals:[],rows:[
+]},
+{id:'page1-2',chapter:'page1',number:2,title:'角與反向延長線',task:'從 ∠1 出發，看看延長角的邊會形成甚麼角。',concept:'angles',diagram:anglePairs,goals:[],rows:[
  K('∠1 的頂點是 O，兩邊為 OA 和 OC。'),
  R('保留 OA。它會成為兩個角的公共邊。','公共邊','保留 OA。',[],'',[],[],{motion:'common'}),
- R('把 CO 延長至 D。∠1 和 ∠2 有公共邊 OA，另外兩邊方向相反，互為鄰補角。','鄰補角','延長 CO。',[],'',[],[],{motion:'adjacent'}),
- R('換用 OC 作公共邊，把 AO 延長至 B。∠1 和 ∠4 也是鄰補角。','鄰補角','延長 AO。',[],'',[],[],{motion:'other-adjacent'}),
- R('回到 ∠1。這次把它的兩條邊分別反向延長。','公共頂點','從頂點 O 延長。',[],'',[],[],{motion:'original'}),
- R('把 AO、CO 分別延長至 B、D。∠1 和 ∠3 共用頂點 O，兩邊各自反向延長，互為對頂角。','對頂角','同時延長兩條邊。',[],'',[],[],{motion:'vertical'})
-],answer:'∠1 和 ∠3 互為對頂角。∠1 的鄰補角是 ∠2 和 ∠4。'},
+ R('∠1 和 ∠2 有公共邊 OA。它們的另一邊 OC、OD 互為反方向延長線。','反向延長','延長 CO。',[],'',[],[],{motion:'adjacent'}),
+ R('∠1 和 ∠2 互為鄰補角。','鄰補角','鄰補角。',[],'',[],[],{motion:'adjacent',animate:false,term:'鄰補角'}),
+ R('兩個角共用頂點 O。','公共頂點','從頂點 O 延長。',[],'',[],[],{motion:'vertex'}),
+ R('∠1 和 ∠3 有一個公共頂點 O，而且兩邊各自互為反方向延長線。','反向延長','同時延長兩條邊。',[],'',[],[],{motion:'vertical'}),
+ R('∠1 和 ∠3 互為對頂角。','對頂角','對頂角。',[],'',[],[],{motion:'vertical',animate:false,term:'對頂角'})
+]},
 {id:'page1-3',chapter:'page1',number:3,title:'填充 (1)',statement:'如圖，直線 AB、CD、EF 相交於點 O。',task:'∠AOC 的對頂角是 ______，∠EOB 的鄰補角是 ______。',diagram:fill1,goals:[],goalFocus:['AOC','EOB'],answerFocus:['BOD','AOE','BOF'],recap:'核對對頂角，並確認兩個鄰補角都找齊。',rows:[
  K('直線 AB、CD、EF 相交於點 O。'),
  R('∠AOC 的對頂角是 ∠BOD。','對頂角','從 ∠AOC 的兩條邊各找反向延長線。',['AOC','BOD']),

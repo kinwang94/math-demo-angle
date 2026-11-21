@@ -32,6 +32,13 @@
 .question-grid button[aria-current="true"]{background:var(--ink);border-color:var(--ink);color:var(--card)}
 .question-grid button[aria-current="true"]:hover{background:var(--blue)}
 .overview-title{position:static;width:auto;transform:none;margin:8px 5px 0;padding:0}
+.overview-layout{max-width:890px;display:grid;grid-template-columns:112px minmax(0,1fr);gap:12px;align-items:start}
+.overview-nav{display:grid;gap:6px}
+.overview-nav button{background:var(--card);padding-inline:12px}
+.overview-nav button[aria-pressed="true"]{background:var(--ink);color:var(--card)}
+.overview-nav button[aria-pressed="true"]:hover{background:var(--blue)}
+.overview .stage{position:static;grid-row:auto}
+@media(max-width:600px){.overview-layout{grid-template-columns:minmax(0,1fr)}.overview-nav{grid-auto-flow:column;justify-content:start}}
 .overview .thought{display:grid;align-content:center;margin-top:6px;min-height:3.2em}
 .concept-ray{fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round}
 .concept-ray.blue{stroke:var(--blue)}
@@ -40,6 +47,9 @@
 .concept-sector.amber{fill:var(--amber)}
 .concept-intersection{fill:var(--red);stroke:var(--card);stroke-width:2}
 .concept-angle-number{font:700 22px var(--sans);text-anchor:middle;fill:var(--ink)}
+.concept-term{font:600 34px var(--serif);text-anchor:middle;fill:var(--ink)}
+.concept-cue{font:500 23px var(--sans);text-anchor:middle;fill:var(--amber)}
+.vertex-cue{fill:var(--red);text-anchor:start}
 .concept-grow{animation:extend-ray .85s ease-out both}
 .concept-reveal{animation:reveal-concept .18s ease-out .88s both}
 .intersection-reveal{animation-delay:1.05s}

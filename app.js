@@ -35,7 +35,7 @@ function lessonFrames(item,opening){
   items.push({kind:'relation',row:i+1});
   if(r.calc)items.push({kind:'calculation',row:i+1});
  });
- items.push({kind:'answer',row:item.rows.length-1});
+ if(!item.concept)items.push({kind:'answer',row:item.rows.length-1});
  return items;
 }
 function rowState(){
@@ -100,27 +100,33 @@ function drawMovingLines(motion,animate){
    svg('text',{x:intersectionX-9,y:fixedY+34,class:'letter'},'O')
   );
  }
+ if(motion!=='original'){
+  $('arcs').append(svg('text',{x:320,y:409,class:animate?'concept-term concept-reveal intersection-reveal':'concept-term'},crossing?'相交':'平行'));
+ }
 }
-function drawExtendingAngles(motion,animate){
+function drawExtendingAngles(motion,animate,term){
  const {points,labels,angles}=lesson.diagram;
  const center=points.O;
- const shared=motion==='other-adjacent'?'C':['common','adjacent'].includes(motion)?'A':'';
- const extensions={
-  adjacent:['D'],'other-adjacent':['B'],vertical:['B','D'],summary:['B','D']
- }[motion]||[];
- const addedAngles={adjacent:['2'],'other-adjacent':['4'],vertical:['3'],summary:['2','3','4']}[motion]||[];
+ const sharesEdge=motion==='common'||motion==='adjacent';
+ const sharesVertex=motion==='vertex'||motion==='vertical';
+ const extensions={adjacent:['D'],vertical:['B','D']}[motion]||[];
+ const addedAngles={adjacent:['2'],vertical:['3']}[motion]||[];
  const rays=$('rays'),marks=$('arcs');
  for(const endpoint of ['A','C',...extensions]){
   const extended=extensions.includes(endpoint);
-  const color=endpoint===shared?'amber':extended?'blue':'';
+  let color='';
+  if(sharesEdge&&endpoint==='A'||motion==='vertical'&&['A','B'].includes(endpoint))color='amber';
+  if((motion==='adjacent'||motion==='vertical')&&['C','D'].includes(endpoint))color='blue';
   const drawing=animate&&extended;
   rays.append(svg('path',{d:`M ${center} L ${points[endpoint]}`,pathLength:1,
    class:`concept-ray ${color}${drawing?' concept-grow':''}`,'data-concept-ray':endpoint}));
   marks.append(svg('text',{x:labels[endpoint][0],y:labels[endpoint][1],
    class:`letter${drawing?' concept-reveal':''}`},endpoint));
  }
- marks.append(svg('circle',{cx:center[0],cy:center[1],r:4,class:'point'}),
+ marks.append(svg('circle',{cx:center[0],cy:center[1],r:sharesVertex?6:4,class:sharesVertex?'concept-intersection':'point'}),
   svg('text',{x:center[0],y:center[1]+26,class:'letter'},'O'));
+ if(sharesEdge)marks.append(svg('text',{x:208,y:369,class:'concept-cue'},'公共邊'));
+ if(motion==='vertex')marks.append(svg('text',{x:346,y:285,class:'concept-cue vertex-cue'},'公共頂點'));
  for(const a of angles.filter(a=>a.name==='1'||addedAngles.includes(a.name))){
   const g=geometry(a),r=82;
   const [x,y]=xy(center,(g.a+g.b)/2,54);
@@ -133,15 +139,16 @@ function drawExtendingAngles(motion,animate){
    svg('text',{x,y:y+7,class:'concept-angle-number'},a.symbol)
   );
  }
+ if(term)marks.append(svg('text',{x:320,y:409,class:'concept-term'},term));
 }
 function draw(state){
  for(const id of ['shades','rays','arcs'])$(id).replaceChildren();
  const f=frames[step],final=f.kind==='answer',goal=f.kind==='goal',r=lesson.rows[f.row];
  if(lesson.concept){
-  const motion=final?'summary':f.kind==='relation'?r.motion:'original';
-  const animate=Boolean(r.motion&&f.kind==='relation'&&step!==previousStep&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
+  const motion=f.kind==='relation'?r.motion:'original';
+  const animate=Boolean(r.motion&&r.animate!==false&&f.kind==='relation'&&step!==previousStep&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
   if(lesson.concept==='lines')drawMovingLines(motion,animate);
-  else drawExtendingAngles(motion,animate);
+  else drawExtendingAngles(motion,animate,r.term);
   return;
  }
  if(f.kind==='diagram'){drawSymbols(true);return;}
@@ -169,6 +176,7 @@ function render(){
  if(overview){
   const caption=f.kind==='intro'?lesson.task:final?plain(lesson.answer):f.kind==='relation'&&r.calc?r.idea:plain(r.math+(f.kind==='calculation'?r.calc:''));
   $('overview-title').textContent=lesson.title;
+  $('thought').hidden=Boolean(lesson.concept);
   paintFrame(caption,state);
   return;
  }
@@ -216,9 +224,22 @@ function select(id,n=0,update=true){
  });
  document.addEventListener('visibilitychange',()=>{if(document.hidden){pause();render();}});
  if(overview){
-  frames=LESSONS.flatMap(item=>lessonFrames(item,['intro']).map(frame=>({...frame,lesson:item})));
-  initDiagram();
-  render();
+  const conceptsButton=$('overview-concepts'),exercisesButton=$('overview-exercises');
+  function selectOverview(concepts){
+   pause();
+   frames=LESSONS.filter(item=>Boolean(item.concept)===concepts)
+    .flatMap(item=>lessonFrames(item,['intro']).map(frame=>({...frame,lesson:item})));
+   lesson=frames[0].lesson;
+   step=0;
+   previousStep=-1;
+   conceptsButton.setAttribute('aria-pressed',String(concepts));
+   exercisesButton.setAttribute('aria-pressed',String(!concepts));
+   initDiagram();
+   render();
+  }
+  conceptsButton.onclick=()=>selectOverview(true);
+  exercisesButton.onclick=()=>selectOverview(false);
+  selectOverview(true);
   return;
  }
  $('show-solution').onchange=e=>{pause();showSolution=e.target.checked;render();};
