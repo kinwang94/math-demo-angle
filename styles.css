@@ -50,9 +50,17 @@
 .overview .worksheet-definition{display:block;margin:10px auto 0;max-width:36em}
 .definition-answer{white-space:nowrap}
 strong.definition-answer{color:var(--blue)}
+.definition-cue{white-space:nowrap}
+.definition-cue.active{color:var(--blue);text-decoration:underline;text-underline-offset:.24em}
 .concept-ray{fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round}
 .concept-ray.blue{stroke:var(--blue)}
 .concept-ray.amber{stroke:var(--amber)}
+.direction-arrow{stroke-width:4;stroke-linejoin:round}
+.direction-label,.concept-angle-number.adjacent-angle.blue{fill:var(--blue)}
+.concept-ray.adjacent-angle{stroke-width:4.2}
+.concept-angle-number.adjacent-angle.amber,.goal-name.alternate-angle{fill:var(--amber)}
+.angle.alternate-angle{stroke:var(--amber)}
+.sector.alternate-angle{fill:var(--amber);opacity:.16}
 .concept-sector{fill:var(--blue);opacity:.14}
 .concept-sector.amber{fill:var(--amber)}
 .concept-intersection{fill:var(--red);stroke:var(--card);stroke-width:2}

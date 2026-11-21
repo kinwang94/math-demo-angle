@@ -70,7 +70,8 @@ const fill1=radial({A:180,B:0,C:210,D:30,E:150,F:330},[
  A('AOE','AOE','',123),A('BOF','BOF','',123)
 ],{radius:229,originLabel:[318,282]});
 const fill2=radial({A:180,B:0,C:235,D:55,E:127},[
- A('AOD','AOD','',85),A('BOC','BOC','',85),A('AOE','AOE','',126),A('BOE','BOE','',126)
+ A('AOD','AOD','',108,{nameDX:33}),A('BOC','BOC','',85),
+ A('AOE','AOE','',80,{nameDX:-29,nameDY:4}),A('BOE','BOE','',126)
 ],{radius:229,originLabel:[337,270]});
 const fill3=radial({M:180,N:0,A:292,B:22},[
  A('AOB','AOB','90°',146,{labelAngle:-11,labelR:184}),
@@ -171,7 +172,7 @@ return [
  R('同一平面上的兩條不同直線只有兩種位置關係：相交有一個交點，平行沒有交點。','相交與平行','比較兩種位置關係。',[],'',[],[],{motion:'compare'})
 ]},
 {id:'page1-2',chapter:'page1',number:2,title:'角與反向延長線',task:'從 ∠1 出發，看看延長角的邊會形成甚麼角。',concept:'angles',
-definition:'有一條公共邊，它們的另一邊互為反方向延長線，這兩個角互為',diagram:anglePairs,goals:[],rows:[
+definition:'有一條公共邊，它們的另一邊互為反方向延長線，這兩個角互為',definitionCue:'反方向延長線',diagram:anglePairs,goals:[],rows:[
  K('∠1 的頂點是 O，兩邊為 OA 和 OC。'),
  R('保留 OA。它會成為兩個角的公共邊。','公共邊','保留 OA。',[],'',[],[],{motion:'common'}),
  R('∠1 和 ∠2 有公共邊 OA。它們的另一邊 OC、OD 互為反方向延長線。','反向延長','延長 CO。',[],'',[],[],{motion:'adjacent'}),

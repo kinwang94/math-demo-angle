@@ -49,15 +49,16 @@ function rowState(){
  }
  return{visible,calculated,revealed,pairs,right};
 }
-function angle(a,state,focus,goal,final){
+function angle(a,state,focus,goal,final,nameOnly=false,alternate=false){
  const g=geometry(a),known=(lesson.diagram.known||[]).includes(a.name),isValue=a.value!=='';
- const active=focus.has(a.name),css=`angle ${known?'known-arc ':''}${goal?'target-angle ':''}${final?'final-angle ':''}${active?'focused ':''}${step!==previousStep&&active?'enter':''}`;
- if(active||goal||final)$('shades').append(svg('path',{d:`M ${g.center} L ${xy(g.center,g.a,a.r)} A ${a.r} ${a.r} 0 ${Math.abs(g.b-g.a)>180?1:0} ${g.b>g.a?0:1} ${xy(g.center,g.b,a.r)} Z`,class:'sector'+(final?' final':''),'data-angle':a.name}));
+ const active=focus.has(a.name),tone=alternate?' alternate-angle':'';
+ const css=`angle ${known?'known-arc ':''}${goal?'target-angle ':''}${final?'final-angle ':''}${active?'focused ':''}${step!==previousStep&&active?'enter':''}${tone}`;
+ if(active||goal||final)$('shades').append(svg('path',{d:`M ${g.center} L ${xy(g.center,g.a,a.r)} A ${a.r} ${a.r} 0 ${Math.abs(g.b-g.a)>180?1:0} ${g.b>g.a?0:1} ${xy(g.center,g.b,a.r)} Z`,class:'sector'+(final?' final':'')+tone,'data-angle':a.name}));
  $('arcs').append(svg('path',{d:arc(g,a.r),class:css,pathLength:1,'data-angle-name':a.name}));
  const mid=a.labelAngle??((g.a+g.b)/2);
  let label=goal?'?':known?a.value:isValue?(showSolution&&state.revealed.has(a.name)?a.value:'?'):'';
  if(!known&&!goal&&(['known','goal'].includes(frames[step].kind)||(!active&&!state.revealed.has(a.name))))label='';
- if(goal){const p=xy(g.center,mid,a.nameR??a.r+105);$('arcs').append(svg('text',{x:p[0]+(a.nameDX||0),y:p[1]+7+(a.nameDY||0),class:'angle-label goal-name'},'∠'+a.name));}
+ if(goal||nameOnly){const p=xy(g.center,mid,a.nameR??a.r+(nameOnly?38:105));$('arcs').append(svg('text',{x:p[0]+(a.nameDX||0),y:p[1]+7+(a.nameDY||0),class:'angle-label goal-name'+tone},'∠'+a.name));}
  if(label){const p=xy(g.center,mid,a.labelR??a.r+28);$('arcs').append(svg('text',{x:p[0]+(a.labelDX||0),y:p[1]+8+(a.labelDY||0),class:`angle-label ${known?'known-label ':''}${goal?'goal-label ':''}${final?'final-label':''}`,'data-value-for':a.name},label));}
 }
 function initDiagram(){
@@ -158,8 +159,19 @@ function drawExtendingAngles(motion,animate){
   const drawing=animate&&extended;
   rays.append(svg('path',{d:`M ${center} L ${points[endpoint]}`,pathLength:1,
    class:`concept-ray ${color}${drawing?' concept-grow':''}`,'data-concept-ray':endpoint}));
+  const directionLabel=motion==='adjacent'&&['C','D'].includes(endpoint)?' direction-label':'';
   marks.append(svg('text',{x:labels[endpoint][0],y:labels[endpoint][1],
-   class:`letter${drawing?' concept-reveal':''}`},endpoint));
+   class:`letter${directionLabel}${drawing?' concept-reveal':''}`},endpoint));
+ }
+ if(motion==='adjacent'){
+  const directions=svg('g',{class:animate?'concept-reveal':'','aria-hidden':'true'});
+  for(const endpoint of ['C','D']){
+   const [x,y]=points[endpoint];
+   const direction=Math.atan2(y-center[1],x-center[0])*180/Math.PI;
+   directions.append(svg('path',{d:'M -14 -7 L 0 0 L -14 7',
+    transform:`translate(${x} ${y}) rotate(${direction})`,class:'concept-ray blue direction-arrow','data-ray-direction':endpoint}));
+  }
+  marks.append(directions);
  }
  marks.append(svg('circle',{cx:center[0],cy:center[1],r:sharesVertex?6:4,class:sharesVertex?'concept-intersection':'point'}),
   svg('text',{x:center[0],y:center[1]+26,class:'letter'},'O'));
@@ -169,12 +181,13 @@ function drawExtendingAngles(motion,animate){
   const g=geometry(a),r=82;
   const [x,y]=xy(center,(g.a+g.b)/2,54);
   const tone=a.name==='2'||a.name==='4'?'amber':'blue';
+  const pairColor=motion==='adjacent'?' adjacent-angle':'';
   const result=svg('g',{class:animate&&a.name!=='1'?'concept-reveal':'','data-concept-angle':a.name});
   marks.append(result);
   result.append(
    svg('path',{d:`M ${center} L ${xy(center,g.a,r)} ${arcEnd(g,r)} Z`,class:`concept-sector ${tone}`}),
-   svg('path',{d:arc(g,r),class:`concept-ray ${tone}`}),
-   svg('text',{x,y:y+7,class:'concept-angle-number'},a.symbol)
+   svg('path',{d:arc(g,r),class:`concept-ray ${tone}${pairColor}`}),
+   svg('text',{x,y:y+7,class:`concept-angle-number ${tone}${pairColor}`},a.symbol)
   );
  }
 }
@@ -193,7 +206,9 @@ function draw(state){
  if(f.kind==='diagram'){drawSymbols(true);return;}
  const givens=[...(lesson.diagram.known||[]),...(lesson.diagram.right||[]),...(lesson.diagram.equal||[]).flat()];
  const answerAngles=lesson.answerFocus||lesson.goals;
- const focus=new Set(f.kind==='known'?givens:goal?[...lesson.goals,...(lesson.goalFocus||[])]:final?answerAngles:r.focus),visible=new Set([...givens,...state.revealed,...focus,...(lesson.diagram.symbols||[])]);
+ const questionAngles=f.kind==='intro'?lesson.goalFocus||[]:[];
+ const focus=new Set(f.kind==='known'?givens:goal?[...lesson.goals,...(lesson.goalFocus||[])]:final?answerAngles:[...r.focus,...questionAngles]),visible=new Set([...givens,...state.revealed,...focus,...(lesson.diagram.symbols||[])]);
+ const alternate=overview&&lesson.goalFocus&&focus.size>1?[...focus].at(-1):null;
  if(goal)for(const p of lesson.goalPairs||[])for(const n of p)line(n,'highlight-ray target-line');
  const proven=new Map(),goalLines=new Set((lesson.goalPairs||[]).flat());
  for(const p of state.pairs){for(const n of p.names)line(n,final&&goalLines.has(n)?'highlight-ray final-ray':'highlight-ray proved-ray');if(p.kind==='parallel')for(const n of p.names){if(!proven.has(n))proven.set(n,new Set());for(const m of p.names)proven.get(n).add(m);}}
@@ -201,7 +216,7 @@ function draw(state){
  if(final)for(const n of lesson.answerLines||[])line(n,'highlight-ray final-ray');
  if(f.kind==='relation')for(const n of r.lines||[])line(n,'highlight-ray proved-ray');
  const groups=[],visited=new Set();for(const name of proven.keys())if(!visited.has(name)){const group=[],todo=[name];while(todo.length){const n=todo.pop();if(visited.has(n))continue;visited.add(n);group.push(n);for(const q of proven.get(n)||[])todo.push(q);}groups.push(group);}groups.forEach((group,i)=>group.forEach(n=>arrow(n,Math.min(i+1,2),final&&goalLines.has(n))));
- for(const a of lesson.diagram.angles)if(visible.has(a.name))angle(a,state,focus,goal&&lesson.goals.includes(a.name),final&&answerAngles.includes(a.name));
+ for(const a of lesson.diagram.angles)if(visible.has(a.name))angle(a,state,focus,goal&&lesson.goals.includes(a.name),final&&answerAngles.includes(a.name),questionAngles.includes(a.name),a.name===alternate);
  for(const [index,group] of connectedGroups(lesson.diagram.equal||[]).entries()){const shown=group.map(n=>lesson.diagram.angles.find(a=>a.name===n)).filter(a=>a&&visible.has(a.name));if(shown.length>1)for(const a of shown)equalTick(a,index+1);}
  for(const n of state.right){const a=lesson.diagram.angles.find(a=>a.name===n);if(a)rightMark(a);}
  drawSymbols();
@@ -232,7 +247,16 @@ function render(){
    const answer=document.createElement(r.term?'strong':'span');
    answer.className='definition-answer';
    answer.textContent=r.term||'＿＿＿＿';
-   thought.replaceChildren(lesson.definition,' ',answer);
+   if(lesson.definitionCue){
+    const [before,after]=lesson.definition.split(lesson.definitionCue);
+    const cue=document.createElement('span');
+    cue.className='definition-cue';
+    cue.classList.toggle('active',r.motion==='adjacent');
+    cue.textContent=lesson.definitionCue;
+    thought.replaceChildren(before,cue,after,' ',answer);
+   }else{
+    thought.replaceChildren(lesson.definition,' ',answer);
+   }
   }else{
    thought.textContent=caption;
   }
