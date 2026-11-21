@@ -9,14 +9,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;900&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=visual-concepts">
-<script src="lessons.js?v=visual-concepts" defer></script>
-<script src="app.js?v=visual-concepts" defer></script>
+<link rel="stylesheet" href="styles.css?v=line-tracking">
+<script src="lessons.js?v=line-tracking" defer></script>
+<script src="app.js?v=line-tracking" defer></script>
 </head>
 <body class="overview" data-overview>
 <main class="overview-layout wrap">
 <nav class="overview-nav" aria-label="選擇動畫">
 <button id="overview-concepts" type="button" aria-pressed="true" aria-controls="overview-stage">概念</button>
+<div class="overview-concept-choices" id="overview-concept-choices" role="group" aria-label="選擇概念">
+<button type="button" data-concept="page1-1" aria-label="概念 1" aria-pressed="true" aria-controls="overview-stage">1</button>
+<button type="button" data-concept="page1-2" aria-label="概念 2" aria-pressed="false" aria-controls="overview-stage">2</button>
+<button type="button" data-concept="page1-vertical" aria-label="概念 3" aria-pressed="false" aria-controls="overview-stage">3</button>
+</div>
 <button id="overview-exercises" type="button" aria-pressed="false" aria-controls="overview-stage">填充題</button>
 </nav>
 <section class="card stage" id="overview-stage" aria-labelledby="overview-title">

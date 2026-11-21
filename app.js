@@ -5,6 +5,8 @@ const overview=document.body?.hasAttribute('data-overview')??false;
 const LESSONS=window.GEOMETRY_LESSONS.filter(p=>(p.chapter==='page1')===overview);
 const CHAPTERS=[['cross','兩直線相交'],['perp','兩直線垂直'],['parallel','平行線的判定']];
 let lesson=LESSONS[0],step=0,showSolution=overview,timer=null,frames=[],previousStep=-1;
+let linePlayback=null;
+const lineTurnDuration=8000,lineParallelHold=1100;
 const last=()=>frames.length-1;
 const plain=s=>s.replace(/<span class="frac"[\s\S]*?<\/span><\/span>/g,'二分之一').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
 function svg(tag,attrs,text){const n=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);if(text!==undefined)n.textContent=text;return n;}
@@ -68,41 +70,80 @@ function initDiagram(){
  $('figure-title').textContent=lesson.title||CHAPTERS.find(c=>c[0]===lesson.chapter)[1]+'，第 '+lesson.number+' 題';
 }
 function drawSymbols(original=false){for(const n of lesson.diagram.symbols||[]){const a=lesson.diagram.angles.find(a=>a.name===n),g=geometry(a),p=xy(g.center,(g.a+g.b)/2,a.r*.62);if(original)$('arcs').append(svg('path',{d:arc(g,a.r),class:'axis','data-original-angle':n}));$('arcs').append(svg('text',{x:p[0],y:p[1]+5,class:'angle-symbol'},a.symbol));}}
-function drawMovingLines(motion,animate){
- const pivot=[320,195],fixedY=290,tilt=32;
- const crossing=motion==='intersect';
- const rotation=crossing?tilt:0;
- const moving=svg('g',{transform:`rotate(${rotation} ${pivot.join(' ')})`,'data-moving-line':''});
- $('rays').append(
-  svg('path',{d:`M 55 ${fixedY} H 585`,class:'axis'}),
-  moving
- );
- moving.append(svg('path',{d:`M 55 ${pivot[1]} H 585`,class:'concept-ray blue'}));
- if(animate){
-  const from=crossing?0:tilt;
-  const turn=svg('animateTransform',{
-   attributeName:'transform',type:'rotate',begin:'indefinite',
-   from:`${from} ${pivot.join(' ')}`,to:`${rotation} ${pivot.join(' ')}`,
-   dur:'1.05s',fill:'freeze',calcMode:'spline',keySplines:'.4 0 .2 1'
-  });
-  moving.append(turn);
-  if(turn.beginElement){
-   moving.setAttribute('transform',`rotate(${from} ${pivot.join(' ')})`);
-   turn.beginElement();
-  }
- }
- if(crossing){
-  const intersectionX=pivot[0]+(fixedY-pivot[1])/Math.tan(tilt*Math.PI/180);
-  const mark=svg('g',{class:animate?'concept-reveal intersection-reveal':''});
-  $('arcs').append(mark);
-  mark.append(
-   svg('circle',{cx:intersectionX,cy:fixedY,r:6,class:'concept-intersection'}),
-   svg('text',{x:intersectionX-9,y:fixedY+34,class:'letter'},'O')
+function drawLineComparison(){
+ const rays=$('rays'),marks=$('arcs');
+ for(const [x,parallel] of [[168,false],[472,true]]){
+  rays.append(
+   svg('path',{d:`M ${x-108} 246 h 216`,class:'axis'}),
+   svg('path',{d:`M ${x-108} ${parallel?180:178} L ${x+108} ${parallel?180:314}`,class:'concept-ray blue'})
+  );
+  if(!parallel)marks.append(svg('circle',{cx:x,cy:246,r:6,class:'concept-intersection'}));
+  marks.append(
+   svg('text',{x,y:374,class:'concept-term'},parallel?'平行':'相交'),
+   svg('text',{x,y:415,class:'concept-line-count'},parallel?'沒有交點':'1 個交點')
   );
  }
- if(motion!=='original'){
-  $('arcs').append(svg('text',{x:320,y:409,class:animate?'concept-term concept-reveal intersection-reveal':'concept-term'},crossing?'相交':'平行'));
+}
+function drawMovingLines(motion,animate){
+ if(motion==='compare'){drawLineComparison();return;}
+ const pivotX=320,pivotY=195,fixedY=290,left=50,right=590;
+ const clip=svg('clipPath',{id:'line-rotation-window'});
+ clip.append(svg('rect',{x:left,y:65,width:right-left,height:324}));
+ const moving=svg('path',{d:`M -350 ${pivotY} H 990`,class:'concept-ray blue','data-moving-line':''});
+ const windowGroup=svg('g',{'clip-path':'url(#line-rotation-window)'});
+ windowGroup.append(moving);
+ $('rays').append(clip,svg('path',{d:`M ${left} ${fixedY} H ${right}`,class:'axis'}),windowGroup);
+ const dot=svg('circle',{cy:fixedY,r:6,class:'concept-intersection'});
+ const arrow=svg('path',{class:'concept-offscreen'});
+ const label=svg('text',{y:fixedY+33,class:'letter concept-point-label'},'O');
+ const term=svg('text',{x:320,y:433,class:'concept-term'});
+ $('arcs').append(dot,arrow,label,term);
+ function showAngle(degrees){
+  const parallel=degrees===0;
+  moving.setAttribute('transform',`rotate(${degrees} ${pivotX} ${pivotY})`);
+  term.textContent=motion==='original'?'':parallel?'平行':'相交';
+  if(parallel){
+   dot.setAttribute('visibility','hidden');
+   arrow.setAttribute('visibility','hidden');
+   label.setAttribute('visibility','hidden');
+   return;
+  }
+  // Intersect the infinite lines before deciding how to show O in the current window.
+  const x=pivotX+(fixedY-pivotY)/Math.tan(degrees*Math.PI/180);
+  const inView=x>=left+9&&x<=right-9;
+  dot.setAttribute('visibility',inView?'visible':'hidden');
+  arrow.setAttribute('visibility',inView?'hidden':'visible');
+  label.setAttribute('visibility','visible');
+  if(inView){
+   dot.setAttribute('cx',x);
+   label.setAttribute('x',x);
+  }else{
+   const edge=x<pivotX?left:right,direction=x<pivotX?-1:1;
+   const start=edge-27*direction,tip=edge-2*direction;
+   arrow.setAttribute('d',`M ${start} ${fixedY} H ${tip} m ${-9*direction} -7 l ${9*direction} 7 l ${-9*direction} 7`);
+   label.setAttribute('x',edge-14*direction);
+  }
  }
+ if(!animate){
+  showAngle(motion==='original'?0:40);
+  return;
+ }
+ const cycle=lineTurnDuration+lineParallelHold;
+ let request=null,elapsed=0,previousTime=null;
+ function tick(time){
+  if(previousTime!==null)elapsed=(elapsed+time-previousTime)%cycle;
+  previousTime=time;
+  const turningTime=Math.max(0,elapsed-lineParallelHold);
+  showAngle(180*turningTime/lineTurnDuration);
+  request=requestAnimationFrame(tick);
+ }
+ linePlayback={
+  get playing(){return request!==null;},
+  start(){previousTime=null;request=requestAnimationFrame(tick);},
+  stop(){if(request!==null)cancelAnimationFrame(request);request=null;}
+ };
+ showAngle(0);
+ linePlayback.start();
 }
 function drawExtendingAngles(motion,animate,term){
  const {points,labels,angles}=lesson.diagram;
@@ -142,12 +183,14 @@ function drawExtendingAngles(motion,animate,term){
  if(term)marks.append(svg('text',{x:320,y:409,class:'concept-term'},term));
 }
 function draw(state){
+ linePlayback?.stop();
+ linePlayback=null;
  for(const id of ['shades','rays','arcs'])$(id).replaceChildren();
  const f=frames[step],final=f.kind==='answer',goal=f.kind==='goal',r=lesson.rows[f.row];
  if(lesson.concept){
   const motion=f.kind==='relation'?r.motion:'original';
   const animate=Boolean(r.motion&&r.animate!==false&&f.kind==='relation'&&step!==previousStep&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
-  if(lesson.concept==='lines')drawMovingLines(motion,animate);
+  if(lesson.concept==='lines')drawMovingLines(motion,motion==='rotate'&&animate&&typeof requestAnimationFrame==='function');
   else drawExtendingAngles(motion,animate,r.term);
   return;
  }
@@ -167,7 +210,17 @@ function draw(state){
  for(const n of state.right){const a=lesson.diagram.angles.find(a=>a.name===n);if(a)rightMark(a);}
  drawSymbols();
 }
-function pause(){if(timer!==null)clearTimeout(timer);timer=null;$('play').textContent=step===last()?'重新播放':'自動播放';$('play').setAttribute('aria-pressed','false');}
+function updatePlay(){
+ const playing=timer!==null||linePlayback?.playing===true;
+ $('play').textContent=playing?'暫停':linePlayback?'繼續旋轉':step===last()?'重新播放':'自動播放';
+ $('play').setAttribute('aria-pressed',String(playing));
+}
+function pause(){
+ if(timer!==null)clearTimeout(timer);
+ timer=null;
+ linePlayback?.stop();
+ updatePlay();
+}
 function keepEquality(s){return s.replace(/=\s*(\d+(?:°(?:\d+′)?)?)/g,'<span class="numeric-equality">= $1</span>');}
 function formula(row,calculated){const extra=calculated?row.calc:'',at=row.math.indexOf(' = ');if(at<0||row.reason==='已知'||row.reason==='設數'||row.math.includes('<br>'))return `<div class="formula">${keepEquality(row.math)}${keepEquality(extra)}</div>`;const lhs=row.math.slice(0,at),rhs=row.math.slice(at).trim();return `<div class="formula equation ${plain(lhs).length>7?'long-lhs':''}"><span class="eq-lhs">${lhs}</span><span class="eq-rhs">${keepEquality(rhs)}${keepEquality(extra)}</span></div>`;}
 function render(){
@@ -191,10 +244,17 @@ function render(){
 function paintFrame(spoken,state){
  if(overview)$('thought').textContent=spoken;
  $('range').max=last();$('range').value=step;$('range').setAttribute('aria-valuetext',spoken);$('count').textContent=`${step} / ${last()}`;$('prev').disabled=step===0;$('next').disabled=step===last();$('reset').disabled=step===0&&timer===null;
- $('announce').textContent=spoken;$('figure-desc').textContent=spoken;if(timer===null)$('play').textContent=step===last()?'重新播放':'自動播放';draw(state);previousStep=step;
+ $('announce').textContent=spoken;$('figure-desc').textContent=spoken;draw(state);updatePlay();previousStep=step;
 }
 function go(n){pause();step=Math.max(0,Math.min(last(),n));render();}
-function advance(){if(step>=last()){pause();render();return;}step++;render();if(step===last()){pause();render();return;}timer=setTimeout(advance,3000);}
+function advance(){
+ if(step>=last()){pause();return;}
+ step++;
+ render();
+ if(step===last()){pause();return;}
+ // Give the rotation a complete sweep and a second view of the parallel position.
+ timer=setTimeout(advance,linePlayback?lineTurnDuration+2*lineParallelHold:3000);
+}
 function navigation(){
  $('questions').innerHTML=CHAPTERS.map(([id,name])=>{
   const buttons=LESSONS.filter(p=>p.chapter===id).map(p=>
@@ -216,30 +276,43 @@ function select(id,n=0,update=true){
  initDiagram();render();if(update)history.replaceState(null,'','#'+lesson.id);
 }
  $('next').onclick=()=>go(step+1);$('prev').onclick=()=>go(step-1);$('reset').onclick=()=>go(0);$('range').oninput=e=>go(Number(e.target.value));
- $('play').onclick=()=>{if(timer!==null){pause();render();return;}if(step===last()){step=0;render();}$('play').textContent='暫停';$('play').setAttribute('aria-pressed','true');timer=setTimeout(advance,1800);$('reset').disabled=false;};
+ $('play').onclick=()=>{
+  if(timer!==null||linePlayback?.playing){pause();if(step===0)$('reset').disabled=true;return;}
+  if(linePlayback){linePlayback.start();updatePlay();return;}
+  if(step===last()){step=0;render();}
+  timer=setTimeout(advance,1800);
+  updatePlay();
+  $('reset').disabled=false;
+ };
  document.addEventListener('keydown',e=>{
   if(e.target.matches?.('input,button,[role="button"]'))return;
   if(e.key==='ArrowRight'){e.preventDefault();go(step+1);}
   if(e.key==='ArrowLeft'){e.preventDefault();go(step-1);}
  });
- document.addEventListener('visibilitychange',()=>{if(document.hidden){pause();render();}});
+ document.addEventListener('visibilitychange',()=>{if(document.hidden){pause();if(step===0)$('reset').disabled=true;}});
  if(overview){
-  const conceptsButton=$('overview-concepts'),exercisesButton=$('overview-exercises');
-  function selectOverview(concepts){
+  const conceptsButton=$('overview-concepts'),exercisesButton=$('overview-exercises'),conceptChoices=$('overview-concept-choices');
+  const conceptButtons=[...conceptChoices.querySelectorAll('button')];
+  let selectedConcept=conceptButtons[0].dataset.concept;
+  function selectOverview(concept){
    pause();
-   frames=LESSONS.filter(item=>Boolean(item.concept)===concepts)
+   if(concept)selectedConcept=concept;
+   frames=LESSONS.filter(item=>concept?item.id===concept:!item.concept)
     .flatMap(item=>lessonFrames(item,['intro']).map(frame=>({...frame,lesson:item})));
    lesson=frames[0].lesson;
    step=0;
    previousStep=-1;
-   conceptsButton.setAttribute('aria-pressed',String(concepts));
-   exercisesButton.setAttribute('aria-pressed',String(!concepts));
+   conceptChoices.hidden=!concept;
+   conceptsButton.setAttribute('aria-pressed',String(Boolean(concept)));
+   exercisesButton.setAttribute('aria-pressed',String(!concept));
+   for(const button of conceptButtons)button.setAttribute('aria-pressed',String(button.dataset.concept===concept));
    initDiagram();
    render();
   }
-  conceptsButton.onclick=()=>selectOverview(true);
-  exercisesButton.onclick=()=>selectOverview(false);
-  selectOverview(true);
+  conceptsButton.onclick=()=>selectOverview(selectedConcept);
+  exercisesButton.onclick=()=>selectOverview(null);
+  for(const button of conceptButtons)button.onclick=()=>selectOverview(button.dataset.concept);
+  selectOverview(selectedConcept);
   return;
  }
  $('show-solution').onchange=e=>{pause();showSolution=e.target.checked;render();};
