@@ -3,34 +3,44 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="初一幾何工作紙 7.1–7.2：14 題角度推算及證明，思路動畫與 T 字解同步。">
+<meta name="description" content="初一幾何工作紙 7.1–7.2 的互動動畫，包含第一頁的概念、三道填充題，以及 14 題角度推算與證明的 T 字解、T 字證。">
 <meta name="theme-color" content="#F6F7F2">
-<title>幾何工作紙 7.1–7.2</title>
+<title>初一幾何工作紙 7.1–7.2｜概念動畫與 T 字解</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;900&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=visual-concepts">
-<script src="lessons.js?v=visual-concepts" defer></script>
-<script src="app.js?v=visual-concepts" defer></script>
+<link rel="stylesheet" href="styles.css?v=worksheet-unified">
+<script src="lessons.js?v=worksheet-unified" defer></script>
+<script src="app.js?v=worksheet-unified" defer></script>
 </head>
 <body>
-<a class="skip" href="#demo">跳到解答</a>
+<a class="skip" id="skip" href="#demo">跳到動畫</a>
 <div class="wrap">
 <header class="page-head">
 <div class="question-picker" id="question-picker">
 <button type="button" class="question-toggle" id="question-toggle" aria-label="選題" aria-expanded="false" aria-controls="questions">
 <span class="hamburger" aria-hidden="true"><i></i><i></i><i></i></span>
 </button>
-<nav class="question-panel card" id="questions" aria-label="選擇題目" hidden></nav>
+<nav class="question-panel card" id="questions" aria-label="選擇動畫或題目" hidden></nav>
 </div>
-<label class="solution-switch"><input id="show-solution" type="checkbox" role="switch" aria-controls="solution"><span class="switch-track" aria-hidden="true"></span><span>顯示解答</span></label>
+<label class="solution-switch" id="solution-toggle"><input id="show-solution" type="checkbox" role="switch" aria-controls="solution"><span class="switch-track" aria-hidden="true"></span><span>顯示解答</span></label>
 </header>
 <section class="card problem" id="problem" aria-label="題目"></section>
-<main class="main" id="demo" data-solution="false">
+<main class="main" id="demo" data-solution="false" tabindex="-1">
 <section class="card work" id="solution" aria-labelledby="solution-title" hidden>
 <h2 id="solution-title">解</h2><div class="proof" id="proof"></div><div class="answer" id="answer" hidden></div>
 </section>
-<section class="card stage" aria-label="幾何動畫">
+<nav class="overview-nav" id="overview-nav" aria-label="選擇動畫" hidden>
+<button id="overview-concepts" type="button" aria-pressed="true" aria-controls="animation-stage">概念</button>
+<div class="overview-concept-choices" id="overview-concept-choices" role="group" aria-label="選擇概念">
+<button type="button" data-concept="page1-1" aria-label="概念 1" aria-pressed="true" aria-controls="animation-stage">1</button>
+<button type="button" data-concept="page1-2" aria-label="概念 2" aria-pressed="false" aria-controls="animation-stage">2</button>
+<button type="button" data-concept="page1-vertical" aria-label="概念 3" aria-pressed="false" aria-controls="animation-stage">3</button>
+</div>
+<button id="overview-exercises" type="button" aria-pressed="false" aria-controls="animation-stage">填充題</button>
+</nav>
+<section class="card stage" id="animation-stage" aria-label="幾何動畫">
+<h2 class="overview-title" id="overview-title" hidden></h2>
 <p class="thought" id="thought"></p>
 <div class="figure"><svg id="figure" viewBox="0 0 640 510" role="img" aria-labelledby="figure-title figure-desc"><title id="figure-title">幾何圖形</title><desc id="figure-desc"></desc><g id="shades"></g><g id="axes"></g><g id="rays"></g><g id="arcs"></g><g id="labels"></g></svg></div>
 <div class="controls"><button id="reset" aria-label="重新開始" title="重新開始">↺</button><button id="prev">上一步</button><button id="play" class="primary" aria-pressed="false">自動播放</button><button id="next">下一步</button></div>

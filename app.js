@@ -1,10 +1,10 @@
 'use strict';
 (()=>{
 const $=id=>document.getElementById(id),NS='http://www.w3.org/2000/svg';
-const overview=document.body?.hasAttribute('data-overview')??false;
-const LESSONS=window.GEOMETRY_LESSONS.filter(p=>(p.chapter==='page1')===overview);
+const LESSONS=window.GEOMETRY_LESSONS.filter(p=>p.chapter!=='page1');
+const OVERVIEW_LESSONS=window.GEOMETRY_LESSONS.filter(p=>p.chapter==='page1');
 const CHAPTERS=[['cross','兩直線相交'],['perp','兩直線垂直'],['parallel','平行線的判定']];
-let lesson=LESSONS[0],step=0,showSolution=overview,timer=null,frames=[],previousStep=-1;
+let overview=false,lesson=LESSONS[0],step=0,showSolution=false,timer=null,frames=[],previousStep=-1;
 let linePlayback=null;
 const lineTurnDuration=3000,lineParallelHold=1100,lineStartAngle=40;
 const lineCycleDuration=lineTurnDuration+lineParallelHold;
@@ -284,7 +284,8 @@ function advance(){
  timer=setTimeout(advance,linePlayback?lineCycleDuration:3000);
 }
 function navigation(){
- $('questions').innerHTML=CHAPTERS.map(([id,name])=>{
+ const overviewChoice=`<button class="overview-choice" type="button" data-lesson="page-one"${overview?' aria-current="true"':''}>第一頁動畫</button>`;
+ $('questions').innerHTML=overviewChoice+CHAPTERS.map(([id,name])=>{
   const buttons=LESSONS.filter(p=>p.chapter===id).map(p=>
    `<button type="button" data-lesson="${p.id}"${lesson.id===p.id?' aria-current="true"':''}>第 ${p.number} 題</button>`
   ).join('');
@@ -297,12 +298,56 @@ function setQuestionMenu(open,restoreFocus=false){
  toggle.setAttribute('aria-expanded',String(open));
  if(restoreFocus)toggle.focus();
 }
+function setOverviewMode(active){
+ overview=active;
+ $('demo').classList.toggle('main',!active);
+ $('demo').classList.toggle('overview-layout',active);
+ $('overview-nav').hidden=!active;
+ $('overview-title').hidden=!active;
+ $('solution-toggle').hidden=active;
+ $('problem').hidden=active;
+ $('range').setAttribute('aria-label',active?'動畫步驟':'解答步驟');
+ $('animation-stage').setAttribute('aria-label',active?'第一頁動畫':'幾何動畫');
+ if(active){
+  $('solution').hidden=true;
+  $('show-solution').checked=false;
+  $('demo').setAttribute('data-solution','false');
+ }else{
+  $('thought').classList.remove('worksheet-definition');
+ }
+}
 function select(id,n=0,update=true){
- const selected=LESSONS.find(p=>p.id===id);if(!selected)return;pause();lesson=selected;showSolution=false;previousStep=-1;frames=lessonFrames(lesson,['diagram','known','goal']);step=Math.max(0,Math.min(last(),n));navigation();
+ const selected=LESSONS.find(p=>p.id===id);if(!selected)return;pause();setOverviewMode(false);lesson=selected;showSolution=false;previousStep=-1;frames=lessonFrames(lesson,['diagram','known','goal']);step=Math.max(0,Math.min(last(),n));navigation();
  $('problem').innerHTML=`<p>${lesson.number}. 已知：${lesson.statement}</p><p>${lesson.task}</p>`;
  $('problem').setAttribute('aria-label',CHAPTERS.find(c=>c[0]===lesson.chapter)[1]+'第 '+lesson.number+' 題');
  initDiagram();render();if(update)history.replaceState(null,'','#'+lesson.id);
 }
+ const conceptsButton=$('overview-concepts'),exercisesButton=$('overview-exercises'),conceptChoices=$('overview-concept-choices');
+ const conceptButtons=[...conceptChoices.querySelectorAll('button')];
+ let selectedConcept=conceptButtons[0].dataset.concept;
+ function selectOverview(concept,update=true){
+  pause();
+  setOverviewMode(true);
+  showSolution=true;
+  if(concept)selectedConcept=concept;
+  frames=OVERVIEW_LESSONS.filter(item=>concept?item.id===concept:!item.concept)
+   .flatMap(item=>lessonFrames(item,['intro']).map(frame=>({...frame,lesson:item})));
+  lesson=frames[0].lesson;
+  step=0;
+  previousStep=-1;
+  conceptChoices.hidden=!concept;
+  conceptsButton.setAttribute('aria-pressed',String(Boolean(concept)));
+  exercisesButton.setAttribute('aria-pressed',String(!concept));
+  for(const button of conceptButtons)button.setAttribute('aria-pressed',String(button.dataset.concept===concept));
+  navigation();
+  initDiagram();
+  render();
+  if(update&&location.hash!=='#page-one')history.replaceState(null,'','#page-one');
+ }
+ conceptsButton.onclick=()=>selectOverview(selectedConcept);
+ exercisesButton.onclick=()=>selectOverview(null);
+ for(const button of conceptButtons)button.onclick=()=>selectOverview(button.dataset.concept);
+ $('skip').onclick=e=>{e.preventDefault();$('demo').focus();};
  $('next').onclick=()=>go(step+1);$('prev').onclick=()=>go(step-1);$('reset').onclick=()=>go(0);$('range').oninput=e=>go(Number(e.target.value));
  $('play').onclick=()=>{
   if(timer!==null||linePlayback?.playing){pause();if(step===0)$('reset').disabled=true;return;}
@@ -318,38 +363,14 @@ function select(id,n=0,update=true){
   if(e.key==='ArrowLeft'){e.preventDefault();go(step-1);}
  });
  document.addEventListener('visibilitychange',()=>{if(document.hidden){pause();if(step===0)$('reset').disabled=true;}});
- if(overview){
-  const conceptsButton=$('overview-concepts'),exercisesButton=$('overview-exercises'),conceptChoices=$('overview-concept-choices');
-  const conceptButtons=[...conceptChoices.querySelectorAll('button')];
-  let selectedConcept=conceptButtons[0].dataset.concept;
-  function selectOverview(concept){
-   pause();
-   if(concept)selectedConcept=concept;
-   frames=LESSONS.filter(item=>concept?item.id===concept:!item.concept)
-    .flatMap(item=>lessonFrames(item,['intro']).map(frame=>({...frame,lesson:item})));
-   lesson=frames[0].lesson;
-   step=0;
-   previousStep=-1;
-   conceptChoices.hidden=!concept;
-   conceptsButton.setAttribute('aria-pressed',String(Boolean(concept)));
-   exercisesButton.setAttribute('aria-pressed',String(!concept));
-   for(const button of conceptButtons)button.setAttribute('aria-pressed',String(button.dataset.concept===concept));
-   initDiagram();
-   render();
-  }
-  conceptsButton.onclick=()=>selectOverview(selectedConcept);
-  exercisesButton.onclick=()=>selectOverview(null);
-  for(const button of conceptButtons)button.onclick=()=>selectOverview(button.dataset.concept);
-  selectOverview(selectedConcept);
-  return;
- }
  $('show-solution').onchange=e=>{pause();showSolution=e.target.checked;render();};
  $('question-toggle').addEventListener('click',()=>setQuestionMenu($('questions').hidden));
  $('questions').addEventListener('click',e=>{
   const button=e.target.closest('[data-lesson]');
   if(!button)return;
   setQuestionMenu(false,true);
-  select(button.dataset.lesson);
+  if(button.dataset.lesson==='page-one')selectOverview(selectedConcept);
+  else select(button.dataset.lesson);
  });
  document.addEventListener('click',e=>{
   if(!$('questions').hidden&&!$('question-picker').contains(e.target))setQuestionMenu(false);
@@ -363,6 +384,7 @@ function select(id,n=0,update=true){
  });
  $('proof').addEventListener('click',e=>{const row=e.target.closest('[data-to]');if(row)go(Number(row.dataset.to));});$('proof').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const row=e.target.closest('[data-to]');if(row){e.preventDefault();go(Number(row.dataset.to));}}});
  function fromHash(){
+  if(location.hash==='#page-one'){selectOverview(selectedConcept,false);return;}
   const match=location.hash.match(/^#((?:cross|perp|parallel)-\d+)(?:\/(\d+))?$/);
   select(match?match[1]:LESSONS[0].id,match?Number(match[2]||0):0,false);
  }
