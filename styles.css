@@ -47,6 +47,9 @@
  .overview-concept-choices{grid-row:2;grid-column:1 / -1;grid-template-columns:repeat(3,44px)}
 }
 .overview .thought{display:grid;align-content:center;margin-top:6px;min-height:3.2em}
+.overview .worksheet-definition{display:block;margin:10px auto 0;max-width:36em}
+.definition-answer{white-space:nowrap}
+strong.definition-answer{color:var(--blue)}
 .concept-ray{fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round}
 .concept-ray.blue{stroke:var(--blue)}
 .concept-ray.amber{stroke:var(--amber)}

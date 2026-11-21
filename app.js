@@ -6,7 +6,8 @@ const LESSONS=window.GEOMETRY_LESSONS.filter(p=>(p.chapter==='page1')===overview
 const CHAPTERS=[['cross','兩直線相交'],['perp','兩直線垂直'],['parallel','平行線的判定']];
 let lesson=LESSONS[0],step=0,showSolution=overview,timer=null,frames=[],previousStep=-1;
 let linePlayback=null;
-const lineTurnDuration=8000,lineParallelHold=1100;
+const lineTurnDuration=3000,lineParallelHold=1100,lineStartAngle=40;
+const lineCycleDuration=lineTurnDuration+lineParallelHold;
 const last=()=>frames.length-1;
 const plain=s=>s.replace(/<span class="frac"[\s\S]*?<\/span><\/span>/g,'二分之一').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
 function svg(tag,attrs,text){const n=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);if(text!==undefined)n.textContent=text;return n;}
@@ -101,7 +102,7 @@ function drawMovingLines(motion,animate){
  function showAngle(degrees){
   const parallel=degrees===0;
   moving.setAttribute('transform',`rotate(${degrees} ${pivotX} ${pivotY})`);
-  term.textContent=motion==='original'?'':parallel?'平行':'相交';
+  term.textContent=parallel?'平行':'相交';
   if(parallel){
    dot.setAttribute('visibility','hidden');
    arrow.setAttribute('visibility','hidden');
@@ -124,14 +125,11 @@ function drawMovingLines(motion,animate){
    label.setAttribute('x',edge-14*direction);
   }
  }
- if(!animate){
-  showAngle(motion==='original'?0:40);
-  return;
- }
- const cycle=lineTurnDuration+lineParallelHold;
- let request=null,elapsed=0,previousTime=null;
+ showAngle(lineStartAngle);
+ if(!animate)return;
+ let request=null,elapsed=lineParallelHold+lineTurnDuration*lineStartAngle/180,previousTime=null;
  function tick(time){
-  if(previousTime!==null)elapsed=(elapsed+time-previousTime)%cycle;
+  if(previousTime!==null)elapsed=(elapsed+time-previousTime)%lineCycleDuration;
   previousTime=time;
   const turningTime=Math.max(0,elapsed-lineParallelHold);
   showAngle(180*turningTime/lineTurnDuration);
@@ -142,10 +140,9 @@ function drawMovingLines(motion,animate){
   start(){previousTime=null;request=requestAnimationFrame(tick);},
   stop(){if(request!==null)cancelAnimationFrame(request);request=null;}
  };
- showAngle(0);
  linePlayback.start();
 }
-function drawExtendingAngles(motion,animate,term){
+function drawExtendingAngles(motion,animate){
  const {points,labels,angles}=lesson.diagram;
  const center=points.O;
  const sharesEdge=motion==='common'||motion==='adjacent';
@@ -180,7 +177,6 @@ function drawExtendingAngles(motion,animate,term){
    svg('text',{x,y:y+7,class:'concept-angle-number'},a.symbol)
   );
  }
- if(term)marks.append(svg('text',{x:320,y:409,class:'concept-term'},term));
 }
 function draw(state){
  linePlayback?.stop();
@@ -191,7 +187,7 @@ function draw(state){
   const motion=f.kind==='relation'?r.motion:'original';
   const animate=Boolean(r.motion&&r.animate!==false&&f.kind==='relation'&&step!==previousStep&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
   if(lesson.concept==='lines')drawMovingLines(motion,motion==='rotate'&&animate&&typeof requestAnimationFrame==='function');
-  else drawExtendingAngles(motion,animate,r.term);
+  else drawExtendingAngles(motion,animate);
   return;
  }
  if(f.kind==='diagram'){drawSymbols(true);return;}
@@ -229,7 +225,17 @@ function render(){
  if(overview){
   const caption=f.kind==='intro'?lesson.task:final?plain(lesson.answer):f.kind==='relation'&&r.calc?r.idea:plain(r.math+(f.kind==='calculation'?r.calc:''));
   $('overview-title').textContent=lesson.title;
-  $('thought').hidden=Boolean(lesson.concept);
+  const thought=$('thought');
+  thought.hidden=Boolean(lesson.concept&&!lesson.definition);
+  thought.classList.toggle('worksheet-definition',Boolean(lesson.definition));
+  if(lesson.definition){
+   const answer=document.createElement(r.term?'strong':'span');
+   answer.className='definition-answer';
+   answer.textContent=r.term||'＿＿＿＿';
+   thought.replaceChildren(lesson.definition,' ',answer);
+  }else{
+   thought.textContent=caption;
+  }
   paintFrame(caption,state);
   return;
  }
@@ -242,7 +248,6 @@ function render(){
  paintFrame(spoken,state);
 }
 function paintFrame(spoken,state){
- if(overview)$('thought').textContent=spoken;
  $('range').max=last();$('range').value=step;$('range').setAttribute('aria-valuetext',spoken);$('count').textContent=`${step} / ${last()}`;$('prev').disabled=step===0;$('next').disabled=step===last();$('reset').disabled=step===0&&timer===null;
  $('announce').textContent=spoken;$('figure-desc').textContent=spoken;draw(state);updatePlay();previousStep=step;
 }
@@ -252,8 +257,7 @@ function advance(){
  step++;
  render();
  if(step===last()){pause();return;}
- // Give the rotation a complete sweep and a second view of the parallel position.
- timer=setTimeout(advance,linePlayback?lineTurnDuration+2*lineParallelHold:3000);
+ timer=setTimeout(advance,linePlayback?lineCycleDuration:3000);
 }
 function navigation(){
  $('questions').innerHTML=CHAPTERS.map(([id,name])=>{

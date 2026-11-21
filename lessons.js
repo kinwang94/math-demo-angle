@@ -165,18 +165,20 @@ return [
  R('∠CFE = ∠CFG + ∠GFE','角的和','∠2 在 FC 與 FG 之間，把它與直角合成 ∠CFE。',['2','GFE','CFE'],E('= 52° + 90° = 142°'),['CFE']),
  R('∠AEF + ∠CFE = ∠1 + ∠CFE','代入','再把 ∠AEF 與 ∠CFE 合起來，檢查同旁內角。',['AEF','CFE'],E('= 38° + 142° = 180°'),['AEF']),
  R('AB // CD','同旁內角互補，兩直線平行','兩個同旁內角互補，因此 AB 與 CD 平行。',['AEF','CFE'],'',[],[['AB','CD']])],answer:'∴ AB 與 CD 平行。'},
-{id:'page1-1',chapter:'page1',number:1,title:'兩直線的位置',task:'同一平面上的兩條不同直線。',concept:'lines',diagram:{},goals:[],rows:[
+{id:'page1-1',chapter:'page1',number:1,title:'兩直線的位置',task:'同一平面上的兩條不同直線相交於 O。',concept:'lines',diagram:{},goals:[],rows:[
  K('兩條不同的直線在同一平面內。'),
  R('藍線持續轉動。兩線方向不同時，相交於 O。方向相同時，兩線平行。','旋轉','追蹤交點 O。',[],'',[],[],{motion:'rotate'}),
  R('同一平面上的兩條不同直線只有兩種位置關係：相交有一個交點，平行沒有交點。','相交與平行','比較兩種位置關係。',[],'',[],[],{motion:'compare'})
 ]},
-{id:'page1-2',chapter:'page1',number:2,title:'角與反向延長線',task:'從 ∠1 出發，看看延長角的邊會形成甚麼角。',concept:'angles',diagram:anglePairs,goals:[],rows:[
+{id:'page1-2',chapter:'page1',number:2,title:'角與反向延長線',task:'從 ∠1 出發，看看延長角的邊會形成甚麼角。',concept:'angles',
+definition:'有一條公共邊，它們的另一邊互為反方向延長線，這兩個角互為',diagram:anglePairs,goals:[],rows:[
  K('∠1 的頂點是 O，兩邊為 OA 和 OC。'),
  R('保留 OA。它會成為兩個角的公共邊。','公共邊','保留 OA。',[],'',[],[],{motion:'common'}),
  R('∠1 和 ∠2 有公共邊 OA。它們的另一邊 OC、OD 互為反方向延長線。','反向延長','延長 CO。',[],'',[],[],{motion:'adjacent'}),
  R('∠1 和 ∠2 互為鄰補角。','鄰補角','鄰補角。',[],'',[],[],{motion:'adjacent',animate:false,term:'鄰補角'})
 ]},
-{id:'page1-vertical',chapter:'page1',number:3,title:'角與反向延長線',task:'∠1 的頂點是 O，兩邊為 OA 和 OC。',concept:'angles',diagram:anglePairs,goals:[],rows:[
+{id:'page1-vertical',chapter:'page1',number:3,title:'角與反向延長線',task:'∠1 的頂點是 O，兩邊為 OA 和 OC。',concept:'angles',
+definition:'有一個公共頂點，且兩邊互為反方向延長線，這兩個角互為',diagram:anglePairs,goals:[],rows:[
  K('∠1 的頂點是 O，兩邊為 OA 和 OC。'),
  R('兩個角共用頂點 O。','公共頂點','從頂點 O 延長。',[],'',[],[],{motion:'vertex'}),
  R('∠1 和 ∠3 有一個公共頂點 O，而且兩邊各自互為反方向延長線。','反向延長','同時延長兩條邊。',[],'',[],[],{motion:'vertical'}),
